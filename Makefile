@@ -6,11 +6,15 @@ OBJDIR = obj
 BINDIR = bin
 
 CC = g++
-CFLAGS = -Wall -g -std=c++11
-INCLUDES = -I$(INCDIR)
-LIB = -pthread
+CFLAGS = -Wall -g -std=c++17
+INCLUDES = -I$(INCDIR) \
+           -IDPP/include \
 
-FILES = main.cpp cdb_io.cpp cdb_logger.cpp
+LIB = -LDPP/library \
+      -pthread \
+      -ldpp
+
+FILES = main.cpp cdb_io.cpp cdb_logger.cpp cdb_discord_bot.cpp
 SRC = $(addprefix $(SRCDIR)/,$(FILES))
 OBJ = $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o, $(SRC))
 BIN = $(BINDIR)/cdb

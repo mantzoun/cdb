@@ -1,2 +1,4 @@
 DPP
 *.swp
+bin/
+obj/
