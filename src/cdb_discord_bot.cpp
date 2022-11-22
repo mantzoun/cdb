@@ -5,17 +5,38 @@
  */
 
 #include "dpp/dpp.h"
+#include <dpp/restresults.h>
+
+#include <stdio.h>
 
 #include "cdb_discord_bot.h"
-#include "cdb_discord_conf.h"
 
 CDB_DiscordBot::CDB_DiscordBot(void)
 {
 }
 
-void CDB_DiscordBot::init(void)
+
+dpp::command_completion_event_t  callback(dpp::confirmation_callback_t value)
 {
-    dpp::cluster bot(BOT_TOKEN);
+    std::cout << "Callback\n";
+    if ( value.is_error() == true ){
+        std::cout << "Error\n";
+        dpp::error_info err = value.get_error();
+        std::cout << err.message;
+    }
+
+    dpp::guild_map guildmap = std::get<dpp::guild_map>(value.value);
+
+    for (auto& it: guildmap) {
+        // Do stuff
+        std::cout << it.second.name;
+    }
+    return NULL;
+}
+
+void CDB_DiscordBot::init(std::string token)
+{
+    dpp::cluster bot(token);
 
     bot.on_log(dpp::utility::cout_logger());
 
@@ -31,6 +52,9 @@ void CDB_DiscordBot::init(void)
                 dpp::slashcommand("ping", "Ping pong!", bot.me.id)
             );
         }
+
+        std::cout << "API call\n";
+        bot.current_user_get_guilds(&callback);
     });
 
     bot.start(dpp::st_wait);

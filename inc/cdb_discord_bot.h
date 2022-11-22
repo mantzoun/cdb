@@ -17,8 +17,8 @@ class CDB_DiscordBot
         CDB_Logger * logger = NULL;
 
     public:
-        CDB_DiscordBot();
-        void init();
+        CDB_DiscordBot(void);
+        void init(std::string);
         void set_logger(CDB_Logger *);
 };
 
