@@ -12,9 +12,11 @@ INCLUDES = -I$(INCDIR) \
 
 LIB = -LDPP/library \
       -pthread \
-      -ldpp
+      -ldpp \
+      -lmosquitto
 
-FILES = main.cpp cdb_io.cpp cdb_logger.cpp cdb_discord_bot.cpp
+FILES = main.cpp cdb_io.cpp cdb_logger.cpp cdb_discord_bot.cpp cdb_config.cpp \
+        cdb_mqtt_handler.cpp
 SRC = $(addprefix $(SRCDIR)/,$(FILES))
 OBJ = $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o, $(SRC))
 BIN = $(BINDIR)/cdb
