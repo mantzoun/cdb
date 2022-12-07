@@ -51,26 +51,29 @@ int main(int argc, char** argv)
 
     conf.config_read(config_file);
 
-    conf.inventory.mqtt_server->set_cb_on_connect(&on_connect);
-    conf.inventory.mqtt_server->set_cb_on_disconnect(&on_disconnect);
-    conf.inventory.mqtt_server->set_cb_on_message(&on_message);
+    if (conf.inventory.mqtt_server != NULL) {
+        conf.inventory.mqtt_server->set_cb_on_connect(&on_connect);
+        conf.inventory.mqtt_server->set_cb_on_disconnect(&on_disconnect);
+        conf.inventory.mqtt_server->set_cb_on_message(&on_message);
 
-    h.init(conf.inventory.mqtt_server);
+        h.init(conf.inventory.mqtt_server);
 
-    int res = h.connect(conf.inventory.mqtt_server);
+        int res = h.connect(conf.inventory.mqtt_server);
 
-    if (CDB_MQTT_OK != res){
-        logger.error("Connection to broker failed, error " + std::to_string(res));
-    } else {
-        logger.info("Connected to broker.");
-    }
-
-    std::list<CDB_MQTT_Device *> * l = conf.mqtt_dev_list();
-    if (l != NULL) {
-        std::list<CDB_MQTT_Device *>::iterator it;
-        for (it = l->begin(); it != l->end(); ++it){
-            h.add_device(*it);
+        if (CDB_MQTT_OK != res){
+            logger.error("Connection to broker failed, error " + std::to_string(res));
+        } else {
+            logger.info("Connected to broker.");
         }
+
+        std::list<CDB_MQTT_Device *> * l = conf.mqtt_dev_list();
+        if (l != NULL) {
+            std::list<CDB_MQTT_Device *>::iterator it;
+            for (it = l->begin(); it != l->end(); ++it){
+                h.add_device(*it);
+            }
+        }
+
     }
 
     logger.info("start process\n");
