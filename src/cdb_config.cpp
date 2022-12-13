@@ -33,13 +33,12 @@ void CDB_Configurator::parse_mqtt_server(std::string line)
     std::string items[CDB_MQTT_SERVER_PARAMS];
 
     if (CDB_CONF_OK == this->conf_line_parser(items, line, sizeof(items)/sizeof(items[0]))) {
-        this->logger->info("Adding server: " + line);
-
         CDB_MQTT_Server * s = new CDB_MQTT_Server(items[CDB_MQTT_SERVER_ADDR],
                                             std::stoi(items[CDB_MQTT_SERVER_PORT]),
                                             items[CDB_MQTT_SERVER_USERNAME],
                                             items[CDB_MQTT_SERVER_PASSWORD],
                                             items[CDB_MQTT_SERVER_CLIENT_ID]);
+        this->logger->debug("Parsed MQTT server configuration for " + s->addr() + ":" + std::to_string(s->port()));
         this->inventory.mqtt_server_add(s);
     }
 }
@@ -49,11 +48,10 @@ void CDB_Configurator::parse_mqtt_device(std::string line)
     std::string items[CDB_MQTT_DEVICE_PARAMS];
 
     if (CDB_CONF_OK == this->conf_line_parser(items, line, sizeof(items)/sizeof(items[0]))) {
-        this->logger->info("Adding device: " + line);
-
         CDB_MQTT_Device * d = new CDB_MQTT_Device(items[CDB_MQTT_DEVICE_NAME],
                                             items[CDB_MQTT_DEVICE_CMND],
                                             items[CDB_MQTT_DEVICE_STAT]);
+        this->logger->debug("Parsed MQTT device configuration for " + d->name());
         this->inventory.mqtt_device_add(d);
     }
 }
@@ -63,9 +61,8 @@ void CDB_Configurator::parse_discord_token(std::string line)
     std::string items[CDB_DISCORD_PARAMS];
 
     if (CDB_CONF_OK == this->conf_line_parser(items, line, sizeof(items)/sizeof(items[0]))) {
-        this->logger->info("Adding discord token");
-
         this->set_discord_token(items[CDB_DISCORD_TOKEN]);
+        this->logger->debug("Parsed discord token configuration");
     }
 }
 

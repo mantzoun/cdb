@@ -11,6 +11,14 @@
 
 #include "cdb_logger.h"
 
+#define     CDB_DISC_MSG_MQQT_DEV_ADD   1
+
+struct cdb_disc_msg
+{
+    uint8_t     type;
+    std::string msg;
+};
+
 class CDB_DiscordBot
 {
     private:
@@ -20,6 +28,7 @@ class CDB_DiscordBot
         CDB_DiscordBot(void);
         void init(std::string);
         void set_logger(CDB_Logger *);
+        void message_cb(cdb_disc_msg *msg);
 };
 
 #endif /* CDB_DISCORD_BOT__H */
