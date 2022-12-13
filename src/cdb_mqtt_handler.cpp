@@ -14,7 +14,7 @@ void CDB_MQTT_Handler::set_logger(CDB_Logger * l)
 void CDB_MQTT_Handler::mosq_logger(mosquitto *mosq, void *obj, int level, const char *str)
 {
     std::string msg = str;
-    logger->info("mosq log " + msg);
+    logger->debug("MQTT Handler: " + msg);
 }
 
 void CDB_MQTT_Handler::init(CDB_MQTT_Server * conf)
@@ -37,11 +37,11 @@ int CDB_MQTT_Handler::connect(CDB_MQTT_Server * conf)
 {
     int res = mosquitto_connect(this->mosq, conf->addr().c_str(), conf->port(), 30);
     if (MOSQ_ERR_SUCCESS != res){
-        logger->error("Connection to broker failed, error " + std::to_string(res));
+        logger->error("Connection to MQTT broker failed, error " + std::to_string(res));
         return CDB_MQTT_NOK;
     }
 
-    logger->info("Connected to broker.");
+    logger->info("Connected to MQTT broker.");
     return CDB_MQTT_OK;
 }
 
