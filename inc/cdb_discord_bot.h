@@ -11,7 +11,9 @@
 
 #include "cdb_logger.h"
 
-#define     CDB_DISC_MSG_MQQT_DEV_ADD   1
+#define     CDB_DISC_MSG_MQTT_DEV_ADD           1
+#define     CDB_DISC_MSG_MQTT_DEV_STATUS_ON     2
+#define     CDB_DISC_MSG_MQTT_DEV_STATUS_OFF    3
 
 struct cdb_disc_msg
 {

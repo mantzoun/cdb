@@ -18,7 +18,7 @@ static dpp::cluster * bot;
 static dpp::snowflake syslog_sf;
 static dpp::snowflake devices_sf;
 
-std::map<std::string, dpp::snowflake> device_map;
+static std::map<std::string, dpp::snowflake> device_map;
 
 CDB_DiscordBot::CDB_DiscordBot(void)
 {
@@ -36,10 +36,20 @@ dpp::command_completion_event_t existing_devices(dpp::confirmation_callback_t va
     dpp::message_map map = std::get<dpp::message_map>(value.value);
 
     for (auto& it: map) {
+        std::string device_name;
         dpp::message m = it.second;
+
         if (m.channel_id == devices_sf){
-            std::cout << "found message for " + m.content + "\n";
-            device_map[m.content] = m.message_reference.message_id;
+            size_t fs = m.content.find(" ");
+
+            if (fs == std::string::npos){
+                device_name = m.content;
+            } else {
+                device_name = m.content.substr(0, fs);
+            }
+
+            std::cout << "found message for " + device_name + "\n";
+            device_map[device_name] = m.id;
         }
     }
 
@@ -59,7 +69,7 @@ dpp::command_completion_event_t my_message_cb(dpp::confirmation_callback_t value
 
     if (m.channel_id == devices_sf) {
         std::cout << "Got respose for " + m.content + "\n";
-        device_map[m.content] = m.message_reference.message_id;
+        device_map[m.content] = m.id;
     }
 
     return NULL;
@@ -122,11 +132,10 @@ dpp::command_completion_event_t  callback(dpp::confirmation_callback_t value)
 
 void CDB_DiscordBot::message_cb(cdb_disc_msg * msg)
 {
-    std::cout << "1";
     dpp::message m;
 
     switch(msg->type){
-        case CDB_DISC_MSG_MQQT_DEV_ADD:
+        case CDB_DISC_MSG_MQTT_DEV_ADD:
             if (device_map.find(msg->msg) == device_map.end()){
                 bot->log(dpp::ll_debug, "message not found for " + msg->msg);
                 m.channel_id = devices_sf;
@@ -136,6 +145,22 @@ void CDB_DiscordBot::message_cb(cdb_disc_msg * msg)
             } else {
                 bot->log(dpp::ll_debug, "message found for " + msg->msg + ". Skipping");
             }
+            break;
+        case CDB_DISC_MSG_MQTT_DEV_STATUS_ON:
+        case CDB_DISC_MSG_MQTT_DEV_STATUS_OFF:
+            if (device_map.find(msg->msg) == device_map.end()){
+                bot->log(dpp::ll_warning, "status message not found for " + msg->msg);
+                return;
+            }
+
+            m = bot->message_get_sync(device_map[msg->msg], devices_sf);
+            if (msg->type == CDB_DISC_MSG_MQTT_DEV_STATUS_ON){
+                m.content    = msg->msg + " is ON";
+            } else if (msg->type == CDB_DISC_MSG_MQTT_DEV_STATUS_OFF){
+                m.content    = msg->msg + " is OFF";
+            }
+
+            bot->message_edit(m, &my_message_cb);
             break;
         default:
             break;
