@@ -7,7 +7,9 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <iostream>
+#include <map>
 #include <mosquitto.h>
+#include <cstring>
 
 #include "cdb_config.h"
 #include "cdb_io.h"
@@ -16,6 +18,8 @@
 
 
 static CDB_DiscordBot bot;
+
+static std::map<std::string, std::string> topic_map;
 
 void on_connect(mosquitto * m, void *obj, int res)
 {
@@ -29,7 +33,19 @@ void on_disconnect(mosquitto * m, void *obj, int res)
 
 void on_message(mosquitto * m, void *obj, const mosquitto_message *message)
 {
-    //printf("mqtt message %s\n", (char*) message->payload);
+    uint8_t type = 255;
+    printf("mqtt message %s\n", (char*) message->payload);
+    if (topic_map.find(message->topic) != topic_map.end()){
+        if (strcmp((char*) message->payload, "ON") == 0){
+            type = CDB_DISC_MSG_MQTT_DEV_STATUS_ON;
+        } else if (strcmp((char*) message->payload, "OFF") == 0){
+            type = CDB_DISC_MSG_MQTT_DEV_STATUS_OFF;
+        }
+
+        std::cout << "device " + topic_map[message->topic] + "\n";
+        cdb_disc_msg  msg = {type, topic_map[message->topic]};
+        bot.message_cb(&msg);
+    }
 }
 
 int main(int argc, char** argv)
@@ -80,8 +96,9 @@ int main(int argc, char** argv)
             for (it = l->begin(); it != l->end(); ++it){
                 logger.info("Adding device " + (*it)->name());
                 m_handler.add_device(*it);
-                cdb_disc_msg  msg = { CDB_DISC_MSG_MQQT_DEV_ADD,
+                cdb_disc_msg  msg = { CDB_DISC_MSG_MQTT_DEV_ADD,
                                       (*it)->name()};
+                topic_map[(*it)->stat()] = (*it)->name();
                 bot.message_cb(&msg);
             }
         }
