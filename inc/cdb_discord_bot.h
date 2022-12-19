@@ -10,27 +10,20 @@
 #define CDB_DISCORD_BOT__H
 
 #include "cdb_logger.h"
+#include "cdb_mqtt_handler.h"
 
-#define     CDB_DISC_MSG_MQTT_DEV_ADD           1
-#define     CDB_DISC_MSG_MQTT_DEV_STATUS_ON     2
-#define     CDB_DISC_MSG_MQTT_DEV_STATUS_OFF    3
-
-struct cdb_disc_msg
-{
-    uint8_t     type;
-    std::string msg;
-};
-
-class CDB_DiscordBot
+class CDB_DiscordBot : public CDB_Callback_Class
 {
     private:
         CDB_Logger * logger = NULL;
+        CDB_Callback_Class * m_handler = NULL;
 
     public:
         CDB_DiscordBot(void);
         void init(std::string);
         void set_logger(CDB_Logger *);
-        void message_cb(cdb_disc_msg *msg);
+        void set_mqtt_handler(CDB_Callback_Class *);
+        void message_cb(cdb_callback_msg *msg);
 };
 
 #endif /* CDB_DISCORD_BOT__H */

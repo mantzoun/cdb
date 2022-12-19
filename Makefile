@@ -15,7 +15,7 @@ LIB = -LDPP/library \
       -ldpp \
       -lmosquitto
 
-FILES = main.cpp cdb_io.cpp cdb_logger.cpp cdb_discord_bot.cpp cdb_config.cpp \
+FILES = main.cpp cdb_io.cpp cdb_logger.cpp cdb_discord_bot.cpp cdb_configurator.cpp \
         cdb_mqtt_handler.cpp
 SRC = $(addprefix $(SRCDIR)/,$(FILES))
 OBJ = $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o, $(SRC))

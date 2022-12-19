@@ -130,16 +130,38 @@ dpp::command_completion_event_t  callback(dpp::confirmation_callback_t value)
     return NULL;
 }
 
-void CDB_DiscordBot::message_cb(cdb_disc_msg * msg)
+void CDB_DiscordBot::message_cb(cdb_callback_msg * msg)
 {
-    dpp::message m;
+    dpp::message m, s;
+    dpp::component c;
+    dpp::component ar;
 
+    bot->log(dpp::ll_debug, "received message");
+    bot->log(dpp::ll_debug, "received message " + msg->msg);
     switch(msg->type){
         case CDB_DISC_MSG_MQTT_DEV_ADD:
             if (device_map.find(msg->msg) == device_map.end()){
                 bot->log(dpp::ll_debug, "message not found for " + msg->msg);
                 m.channel_id = devices_sf;
                 m.content    = msg->msg;
+
+                ar.set_type(dpp::cot_action_row);
+
+                c.set_style(dpp::cos_success);
+                c.set_label("ON");
+                c.set_id(msg->msg + "#ON");
+                c.set_type(dpp::cot_button);
+
+                ar.add_component(c);
+
+                c.set_style(dpp::cos_danger);
+                c.set_label("OFF");
+                c.set_id(msg->msg + "#OFF");
+                c.set_type(dpp::cot_button);
+
+                ar.add_component(c);
+
+                m.add_component(ar);
 
                 bot->message_create(m, &my_message_cb);
             } else {
@@ -160,7 +182,11 @@ void CDB_DiscordBot::message_cb(cdb_disc_msg * msg)
                 m.content    = msg->msg + " is OFF";
             }
 
+            s.channel_id = syslog_sf;
+            s.content    = m.content;
+
             bot->message_edit(m, &my_message_cb);
+            bot->message_create(s, &my_message_cb);
             break;
         default:
             break;
@@ -173,10 +199,47 @@ void CDB_DiscordBot::init(std::string token)
 
     bot->on_log(dpp::utility::cout_logger());
 
-    bot->on_slashcommand([](const dpp::slashcommand_t& event) {
-        if (event.command.get_command_name() == "ping") {
-            event.reply("Pong!");
+    bot->on_button_click([this](const dpp::button_click_t & event) {
+        /* Button clicks are still interactions, and must be replied to in some form to
+         * prevent the "this interaction has failed" message from Discord to the user.
+         */
+        event.reply();
+
+        char dev_id[50];
+        char * tmp;
+        int index = 0;
+        cdb_callback_msg msg = {255, "N/A"};
+
+        this->logger->debug("parse message  " + event.custom_id);
+
+        strncpy(dev_id, event.custom_id.c_str(), sizeof(dev_id));
+        tmp = strtok(dev_id, "#");
+
+        while (tmp != NULL)
+        {
+            switch(index++){
+                case 0:
+                    msg.msg=tmp;
+                    this->logger->debug("message is " + msg.msg);
+                    break;
+                case 1:
+                    if (strcmp(tmp, "ON") == 0) {
+                        msg.type = CDB_MQTT_HANDLER_TURN_DEVICE_ON;
+                    } else if (strcmp(tmp, "OFF") == 0) {
+                        msg.type = CDB_MQTT_HANDLER_TURN_DEVICE_OFF;
+                    }
+
+                    this->logger->debug("type is " + std::to_string(msg.type));
+                    break;
+                default:
+                    this->logger->error("Unexpected number of arguments : " + event.custom_id);
+                    break;
+            }
+
+            tmp = strtok (NULL, "#");
         }
+
+        this->m_handler->message_cb(&msg);
     });
 
     bot->on_ready([](const dpp::ready_t& event) {
@@ -191,6 +254,11 @@ void CDB_DiscordBot::init(std::string token)
     });
 
     bot->start(dpp::st_return);
+}
+
+void CDB_DiscordBot::set_mqtt_handler(CDB_Callback_Class * m_handler)
+{
+    this->m_handler = m_handler;
 }
 
 /*
