@@ -11,42 +11,14 @@
 #include <mosquitto.h>
 #include <cstring>
 
-#include "cdb_config.h"
+#include "cdb_configurator.h"
 #include "cdb_io.h"
 #include "cdb_logger.h"
 #include "cdb_discord_bot.h"
+#include "cdb_mqtt_handler.h"
 
 
 static CDB_DiscordBot bot;
-
-static std::map<std::string, std::string> topic_map;
-
-void on_connect(mosquitto * m, void *obj, int res)
-{
-    //printf("mqtt on connect res %d\n", res);
-}
-
-void on_disconnect(mosquitto * m, void *obj, int res)
-{
-    //printf("mqtt on disconnect res %d\n", res);
-}
-
-void on_message(mosquitto * m, void *obj, const mosquitto_message *message)
-{
-    uint8_t type = 255;
-    printf("mqtt message %s\n", (char*) message->payload);
-    if (topic_map.find(message->topic) != topic_map.end()){
-        if (strcmp((char*) message->payload, "ON") == 0){
-            type = CDB_DISC_MSG_MQTT_DEV_STATUS_ON;
-        } else if (strcmp((char*) message->payload, "OFF") == 0){
-            type = CDB_DISC_MSG_MQTT_DEV_STATUS_OFF;
-        }
-
-        std::cout << "device " + topic_map[message->topic] + "\n";
-        cdb_disc_msg  msg = {type, topic_map[message->topic]};
-        bot.message_cb(&msg);
-    }
-}
 
 int main(int argc, char** argv)
 {
@@ -73,38 +45,12 @@ int main(int argc, char** argv)
     io.fifo_init("/tmp/mqtt_disc_cpp.fifo", NULL);
 
     logger.info("Starting Discord Bot\n");
+    bot.set_logger(&logger);
     bot.init(conf.discord_token());
+    bot.set_mqtt_handler(&m_handler);
 
-    if (conf.inventory.mqtt_server != NULL) {
-        conf.inventory.mqtt_server->set_cb_on_connect(&on_connect);
-        conf.inventory.mqtt_server->set_cb_on_disconnect(&on_disconnect);
-        conf.inventory.mqtt_server->set_cb_on_message(&on_message);
-
-        m_handler.init(conf.inventory.mqtt_server);
-
-        int res = m_handler.connect(conf.inventory.mqtt_server);
-
-//        if (CDB_MQTT_OK != res){
-//            logger.error("Connection to broker failed, error " + std::to_string(res));
-//        } else {
-//            logger.info("Connected to broker.");
-//        }
-
-        std::list<CDB_MQTT_Device *> * l = conf.mqtt_dev_list();
-        if (l != NULL) {
-            std::list<CDB_MQTT_Device *>::iterator it;
-            for (it = l->begin(); it != l->end(); ++it){
-                logger.info("Adding device " + (*it)->name());
-                m_handler.add_device(*it);
-                cdb_disc_msg  msg = { CDB_DISC_MSG_MQTT_DEV_ADD,
-                                      (*it)->name()};
-                topic_map[(*it)->stat()] = (*it)->name();
-                bot.message_cb(&msg);
-            }
-        }
-    } else {
-        logger.info("No MQTT broker configured, skipping MQTT setup");
-    }
+    m_handler.set_discord_bot(&bot);
+    m_handler.init(&conf);
 
     logger.info("Init done, entering loop");
 

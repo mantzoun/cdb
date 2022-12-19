@@ -4,14 +4,6 @@
 #include <string>
 #include <mosquitto.h>
 
-#define CDB_MQTT_SERVER_TYPE        0
-#define CDB_MQTT_SERVER_ADDR        1
-#define CDB_MQTT_SERVER_PORT        2
-#define CDB_MQTT_SERVER_USERNAME    3
-#define CDB_MQTT_SERVER_PASSWORD    4
-#define CDB_MQTT_SERVER_CLIENT_ID   5
-#define CDB_MQTT_SERVER_PARAMS      6
-
 class CDB_MQTT_Server
 {
     private:

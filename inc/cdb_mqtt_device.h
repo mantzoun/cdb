@@ -5,12 +5,6 @@
 
 #include "cdb_device.h"
 
-#define CDB_MQTT_DEVICE_TYPE   0
-#define CDB_MQTT_DEVICE_NAME   1
-#define CDB_MQTT_DEVICE_CMND   2
-#define CDB_MQTT_DEVICE_STAT   3
-#define CDB_MQTT_DEVICE_PARAMS 4
-
 class CDB_MQTT_Device : public CDB_Device
 {
     private:
