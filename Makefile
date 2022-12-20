@@ -4,6 +4,10 @@ SRCDIR = src
 INCDIR = inc
 OBJDIR = obj
 BINDIR = bin
+DOCDIR = doc
+
+DOX = doxygen
+DOXYFILE = Doxyfile
 
 CC = g++
 CFLAGS = -Wall -g -std=c++17
@@ -21,7 +25,7 @@ SRC = $(addprefix $(SRCDIR)/,$(FILES))
 OBJ = $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o, $(SRC))
 BIN = $(BINDIR)/cdb
 
-.PHONY: all clean
+.PHONY: all clean dox
 
 all: $(BIN)
 
@@ -37,5 +41,12 @@ $(OBJDIR):
 $(BINDIR):
 	@mkdir -p $(BINDIR)
 
+$(DOCDIR):
+	@mkdir -p $(DOCDIR)
+
 clean:
 	@rm -rf $(OBJDIR) $(BINDIR)
+
+dox:  | $(DOCDIR)
+	@rm -rf $(DOCDIR)
+	$(DOX) $(DOXYFILE)

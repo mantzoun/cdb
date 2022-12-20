@@ -23,13 +23,13 @@ static void on_disconnect(mosquitto * m, void *obj, int res)
 
 static void on_message(mosquitto * m, void *obj, const mosquitto_message *message)
 {
-    uint8_t type = 255;
+    cdb_msg_t type = CDB_MSG_MAX;
     printf("mqtt message %s\n", (char*) message->payload);
     if (stat_topic_map.find(message->topic) != stat_topic_map.end()){
         if (strcmp((char*) message->payload, "ON") == 0){
-            type = CDB_DISC_MSG_MQTT_DEV_STATUS_ON;
+            type = CDB_MSG_DISC_MQTT_DEV_STATUS_ON;
         } else if (strcmp((char*) message->payload, "OFF") == 0){
-            type = CDB_DISC_MSG_MQTT_DEV_STATUS_OFF;
+            type = CDB_MSG_DISC_MQTT_DEV_STATUS_OFF;
         }
 
         std::cout << "device " + stat_topic_map[message->topic] + "\n";
@@ -61,14 +61,14 @@ void CDB_MQTT_Handler::message_cb(cdb_callback_msg * msg)
     const char * cmd_poll = "";
 
     switch(msg->type){
-        case CDB_MQTT_HANDLER_TURN_DEVICE_ON:
-            this->publish(cmnd_topic_map[msg->msg].c_str(), sizeof(cmd_on), cmd_on);
+        case CDB_MSG_MQTT_HANDLER_TURN_DEVICE_ON:
+            this->publish(cmnd_topic_map[msg->content].c_str(), sizeof(cmd_on), cmd_on);
             break;
-        case CDB_MQTT_HANDLER_TURN_DEVICE_OFF:
-            this->publish(cmnd_topic_map[msg->msg].c_str(), sizeof(cmd_off), cmd_off);
+        case CDB_MSG_MQTT_HANDLER_TURN_DEVICE_OFF:
+            this->publish(cmnd_topic_map[msg->content].c_str(), sizeof(cmd_off), cmd_off);
             break;
-        case CDB_MQTT_HANDLER_POLL_DEVICE_STATUS:
-            this->publish(cmnd_topic_map[msg->msg].c_str(), sizeof(cmd_poll), cmd_poll);
+        case CDB_MSG_MQTT_HANDLER_POLL_DEVICE_STATUS:
+            this->publish(cmnd_topic_map[msg->content].c_str(), sizeof(cmd_poll), cmd_poll);
             break;
         default:
             this->logger->warn("Unexpected message type: " + std::to_string(msg->type));
@@ -93,10 +93,6 @@ void CDB_MQTT_Handler::init(CDB_Configurator * conf)
     if (l == NULL) {
         logger->info("No MQTT devices configured, skipping MQTT setup");
     }
-
-//    conf->inventory.mqtt_server->set_cb_on_connect(&on_connect);
-//    conf->inventory.mqtt_server->set_cb_on_disconnect(&on_disconnect);
-//    conf->inventory.mqtt_server->set_cb_on_message(&on_message);
 
 //    if (CDB_MQTT_OK != res){
 //        logger.error("Connection to broker failed, error " + std::to_string(res));
@@ -124,7 +120,7 @@ void CDB_MQTT_Handler::init(CDB_Configurator * conf)
     for (it = l->begin(); it != l->end(); ++it){
         logger->info("Adding device " + (*it)->name());
         this->add_device(*it);
-        cdb_callback_msg msg = { CDB_DISC_MSG_MQTT_DEV_ADD,
+        cdb_callback_msg msg = { CDB_MSG_DISC_MQTT_DEV_ADD,
                                  (*it)->name()};
         stat_topic_map[(*it)->stat()] = (*it)->name();
         cmnd_topic_map[(*it)->name()] = (*it)->cmnd();

@@ -137,26 +137,26 @@ void CDB_DiscordBot::message_cb(cdb_callback_msg * msg)
     dpp::component ar;
 
     bot->log(dpp::ll_debug, "received message");
-    bot->log(dpp::ll_debug, "received message " + msg->msg);
+    bot->log(dpp::ll_debug, "received message " + msg->content);
     switch(msg->type){
-        case CDB_DISC_MSG_MQTT_DEV_ADD:
-            if (device_map.find(msg->msg) == device_map.end()){
-                bot->log(dpp::ll_debug, "message not found for " + msg->msg);
+        case CDB_MSG_DISC_MQTT_DEV_ADD:
+            if (device_map.find(msg->content) == device_map.end()){
+                bot->log(dpp::ll_debug, "message not found for " + msg->content);
                 m.channel_id = devices_sf;
-                m.content    = msg->msg;
+                m.content    = msg->content;
 
                 ar.set_type(dpp::cot_action_row);
 
                 c.set_style(dpp::cos_success);
                 c.set_label("ON");
-                c.set_id(msg->msg + "#ON");
+                c.set_id(msg->content + "#ON");
                 c.set_type(dpp::cot_button);
 
                 ar.add_component(c);
 
                 c.set_style(dpp::cos_danger);
                 c.set_label("OFF");
-                c.set_id(msg->msg + "#OFF");
+                c.set_id(msg->content + "#OFF");
                 c.set_type(dpp::cot_button);
 
                 ar.add_component(c);
@@ -165,21 +165,21 @@ void CDB_DiscordBot::message_cb(cdb_callback_msg * msg)
 
                 bot->message_create(m, &my_message_cb);
             } else {
-                bot->log(dpp::ll_debug, "message found for " + msg->msg + ". Skipping");
+                bot->log(dpp::ll_debug, "message found for " + msg->content + ". Skipping");
             }
             break;
-        case CDB_DISC_MSG_MQTT_DEV_STATUS_ON:
-        case CDB_DISC_MSG_MQTT_DEV_STATUS_OFF:
-            if (device_map.find(msg->msg) == device_map.end()){
-                bot->log(dpp::ll_warning, "status message not found for " + msg->msg);
+        case CDB_MSG_DISC_MQTT_DEV_STATUS_ON:
+        case CDB_MSG_DISC_MQTT_DEV_STATUS_OFF:
+            if (device_map.find(msg->content) == device_map.end()){
+                bot->log(dpp::ll_warning, "status message not found for " + msg->content);
                 return;
             }
 
-            m = bot->message_get_sync(device_map[msg->msg], devices_sf);
-            if (msg->type == CDB_DISC_MSG_MQTT_DEV_STATUS_ON){
-                m.content    = msg->msg + " is ON";
-            } else if (msg->type == CDB_DISC_MSG_MQTT_DEV_STATUS_OFF){
-                m.content    = msg->msg + " is OFF";
+            m = bot->message_get_sync(device_map[msg->content], devices_sf);
+            if (msg->type == CDB_MSG_DISC_MQTT_DEV_STATUS_ON){
+                m.content    = msg->content + " is ON";
+            } else if (msg->type == CDB_MSG_DISC_MQTT_DEV_STATUS_OFF){
+                m.content    = msg->content + " is OFF";
             }
 
             s.channel_id = syslog_sf;
@@ -208,7 +208,7 @@ void CDB_DiscordBot::init(std::string token)
         char dev_id[50];
         char * tmp;
         int index = 0;
-        cdb_callback_msg msg = {255, "N/A"};
+        cdb_callback_msg msg = {CDB_MSG_MAX, "N/A"};
 
         this->logger->debug("parse message  " + event.custom_id);
 
@@ -219,14 +219,14 @@ void CDB_DiscordBot::init(std::string token)
         {
             switch(index++){
                 case 0:
-                    msg.msg=tmp;
-                    this->logger->debug("message is " + msg.msg);
+                    msg.content = tmp;
+                    this->logger->debug("message is " + msg.content);
                     break;
                 case 1:
                     if (strcmp(tmp, "ON") == 0) {
-                        msg.type = CDB_MQTT_HANDLER_TURN_DEVICE_ON;
+                        msg.type = CDB_MSG_MQTT_HANDLER_TURN_DEVICE_ON;
                     } else if (strcmp(tmp, "OFF") == 0) {
-                        msg.type = CDB_MQTT_HANDLER_TURN_DEVICE_OFF;
+                        msg.type = CDB_MSG_MQTT_HANDLER_TURN_DEVICE_OFF;
                     }
 
                     this->logger->debug("type is " + std::to_string(msg.type));

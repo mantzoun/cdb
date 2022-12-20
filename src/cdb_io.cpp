@@ -1,7 +1,7 @@
 /*
  * cdb_io.cpp
  *
- * implementation of CDB_IO class methods
+ * Implementation of CDB_IO class methods
  */
 
 #include <fstream>
@@ -9,16 +9,10 @@
 
 #include "cdb_io.h"
 
-
 CDB_IO::CDB_IO(void)
 {
 }
 
-/*
- * fifo_read
- *
- * read from the defined named fifo
- */
 void CDB_IO::fifo_read(void)
 {
      this->logger->debug("starting fifo");
@@ -30,7 +24,6 @@ void CDB_IO::fifo_read(void)
         this->logger->debug("entering fifo io loop");
 
         while (std::getline(fifo, line)){
-//            std::cout << line << '\n';
         }
         if (fifo.eof()){
             fifo.clear();
@@ -41,11 +34,6 @@ void CDB_IO::fifo_read(void)
     this->logger->warn("exiting fifo io loop");
 }
 
-/*
- * fifo_init
- *
- * Start the thread that will parse input from the fifo
- */
 bool CDB_IO::fifo_init(std::string path, void * cb)
 {
     if (fifo_t != NULL){
@@ -65,11 +53,6 @@ bool CDB_IO::fifo_init(std::string path, void * cb)
     return true;
 }
 
-/*
- * fifo_terminate
- *
- * stop the fifo_read thread
- */
 void CDB_IO::fifo_terminate()
 {
     if (this->fifo_t == NULL){
@@ -83,11 +66,6 @@ void CDB_IO::fifo_terminate()
     this->fifo_t = NULL;
 }
 
-/*
- * set_logger
- *
- * Set the logger object used for logging
- */
 void CDB_IO::set_logger(CDB_Logger * l)
 {
     this->logger = l;
