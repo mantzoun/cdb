@@ -4,6 +4,10 @@ SRCDIR = src
 INCDIR = inc
 OBJDIR = obj
 BINDIR = bin
+DOCDIR = doc
+
+DOX = doxygen
+DOXYFILE = Doxyfile
 
 CC = g++
 CFLAGS = -Wall -g -std=c++17
@@ -12,14 +16,16 @@ INCLUDES = -I$(INCDIR) \
 
 LIB = -LDPP/library \
       -pthread \
-      -ldpp
+      -ldpp \
+      -lmosquitto
 
-FILES = main.cpp cdb_io.cpp cdb_logger.cpp cdb_discord_bot.cpp
+FILES = main.cpp cdb_io.cpp cdb_logger.cpp cdb_discord_bot.cpp cdb_configurator.cpp \
+        cdb_mqtt_handler.cpp
 SRC = $(addprefix $(SRCDIR)/,$(FILES))
 OBJ = $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o, $(SRC))
 BIN = $(BINDIR)/cdb
 
-.PHONY: all clean
+.PHONY: all clean dox
 
 all: $(BIN)
 
@@ -35,5 +41,12 @@ $(OBJDIR):
 $(BINDIR):
 	@mkdir -p $(BINDIR)
 
+$(DOCDIR):
+	@mkdir -p $(DOCDIR)
+
 clean:
 	@rm -rf $(OBJDIR) $(BINDIR)
+
+dox:  | $(DOCDIR)
+	@rm -rf $(DOCDIR)
+	$(DOX) $(DOXYFILE)

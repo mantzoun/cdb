@@ -4,28 +4,57 @@
  * initialize logger object and i/o thread.
  */
 
-#include<stdio.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <iostream>
+#include <map>
+#include <mosquitto.h>
+#include <cstring>
 
+#include "cdb_configurator.h"
 #include "cdb_io.h"
 #include "cdb_logger.h"
 #include "cdb_discord_bot.h"
+#include "cdb_mqtt_handler.h"
 
-int main()
+
+static CDB_DiscordBot bot;
+
+int main(int argc, char** argv)
 {
-    CDB_IO io;
-    CDB_DiscordBot bot;
+    if (argc < 2){
+        std::cout << "Usage: cdb <config_file>\n";
+        exit(1);
+    }
+
+    std::string config_file = argv[1];
+
     CDB_Logger logger = CDB_Logger(CDB_LOG_DEBUG);
 
-    io.set_logger(&logger);
+    CDB_IO io;
+    CDB_Configurator conf;
+    CDB_MQTT_Handler m_handler;
 
-    logger.info("start process\n");
+    m_handler.set_logger(&logger);
+    io.set_logger(&logger);
+    conf.set_logger(&logger);
+
+    logger.info("Reading config file");
+    conf.config_read(config_file);
 
     io.fifo_init("/tmp/mqtt_disc_cpp.fifo", NULL);
 
-    bot.init();
+    logger.info("Starting Discord Bot\n");
+    bot.set_logger(&logger);
+    bot.init(conf.discord_token());
+    bot.set_mqtt_handler(&m_handler);
 
-    logger.info("bot init done\n");
+    m_handler.set_discord_bot(&bot);
+    m_handler.init(&conf);
 
-    while(1);
-    logger.info("exit 0\n");
+    logger.info("Init done, entering loop");
+
+    while(1){
+        usleep(1000000);
+    }
 }

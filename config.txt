@@ -1,0 +1,11 @@
+# MQTT server
+# <mqtt_server> <server_address> <server_port> <username> <password> <client_id>
+mqtt server     127.0.0.1   1883    user    abc123  client1
+
+# MQTT devices
+# <mqtt> <name> <cmnd topic> <stat topic>
+mqtt    device_name    cmnd/device/POWER   stat/device/POWER
+
+# Discord token
+# <discord_token>  <TOKEN>
+discord_token acb123

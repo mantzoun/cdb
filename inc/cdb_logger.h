@@ -26,6 +26,7 @@ class CDB_Logger
     public:
                 CDB_Logger(cdb_log_lvl);
 
+        void    set_level(cdb_log_lvl);
         void    log(cdb_log_lvl, std::string);
 
         void    debug(std::string);
