@@ -83,7 +83,9 @@ void CDB_MQTT_Handler::mosq_logger(mosquitto *mosq, void *obj, int level, const 
 
 void CDB_MQTT_Handler::init(CDB_Configurator * conf)
 {
-    if (conf->inventory.mqtt_server == NULL) {
+    CDB_MQTT_Server * broker = conf->inventory.mqtt_server();
+
+    if (broker == NULL) {
         logger->info("No MQTT broker configured, skipping MQTT setup");
         return;
     }
@@ -102,9 +104,9 @@ void CDB_MQTT_Handler::init(CDB_Configurator * conf)
 
     mosquitto_lib_init();
 
-    this->mosq = mosquitto_new(conf->inventory.mqtt_server->client_id().c_str(), true, NULL);
-    mosquitto_username_pw_set(this->mosq, conf->inventory.mqtt_server->username().c_str(),
-                                          conf->inventory.mqtt_server->password().c_str());
+    this->mosq = mosquitto_new(broker->client_id().c_str(), true, NULL);
+    mosquitto_username_pw_set(this->mosq, broker->username().c_str(),
+                                          broker->password().c_str());
 
     mosquitto_connect_callback_set(this->mosq, &on_connect);
     mosquitto_disconnect_callback_set(this->mosq, &on_disconnect);
@@ -112,7 +114,7 @@ void CDB_MQTT_Handler::init(CDB_Configurator * conf)
 
     mosquitto_log_callback_set(this->mosq, &CDB_MQTT_Handler::mosq_logger);
 
-    this->connect(conf->inventory.mqtt_server);
+    this->connect(broker);
 
     mosquitto_loop_start(this->mosq);
 
