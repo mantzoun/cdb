@@ -2,3 +2,5 @@ DPP
 *.swp
 bin/
 obj/
+doc/
+*.0

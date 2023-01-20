@@ -1,10 +1,3 @@
-/*
- * cdb_io.h
- *
- * handle process I/O with local system.
- * Currently supports input via named fifo
- */
-
 #ifndef __CDB_IO__H
 #define __CDB_IO__H
 
@@ -12,22 +5,61 @@
 
 #include "cdb_logger.h"
 
-class CDB_IO
-{
-private:
-    bool        fifo_stop;
-    std::thread * fifo_t = NULL;
-    std::string fifo_path;
-    void        * fifo_cb;
-    CDB_Logger  * logger = NULL;
+namespace cdb {
+    /**
+     * @class IO
+     *
+     * @brief Class CDB_IO handles the local input/output for
+     *        the running process
+     *
+     *        Currently only oneway reading from a named fifo
+     *        is implemented
+     */
+    class IO
+    {
+    private:
+        bool        fifo_stop;
+        std::thread * fifo_t = NULL;
+        std::string fifo_path;
+        void        * fifo_cb;
+        cdb::Logger * logger = NULL;
 
-    void    fifo_read(void);
+       /**
+        * fifo_read
+        *
+        * read from the defined named fifo
+        */
+        void fifo_read(void);
 
-public:
-            CDB_IO(void);
-    bool    fifo_init(std::string, void *);
-    void    fifo_terminate(void);
-    void    set_logger(CDB_Logger *);
-};
+    public:
+        /**
+         * @brief Default constructor
+         */
+        IO(void);
+
+        /**
+         * @brief Initialize the named fifo
+         *
+         *        Start the thread that will parse input from the fifo
+         *
+         * @return true if in case os success
+         */
+        bool fifo_init(std::string, void *);
+
+        /**
+         * @brief Terminate the fifo
+         *
+         *        stop the fifo_read thread
+         */
+        void fifo_terminate(void);
+
+        /**
+         * @brief Set the logger object
+         *
+         * @param logger The logger object
+         */
+        void set_logger(cdb::Logger * logger);
+    };
+}
 
 #endif /* __CDB_IO__H */
