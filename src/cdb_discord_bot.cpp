@@ -20,7 +20,7 @@ static dpp::snowflake devices_sf;
 
 static std::map<std::string, dpp::snowflake> device_map;
 
-CDB_DiscordBot::CDB_DiscordBot(void)
+cdb::DiscordBot::DiscordBot(void)
 {
 }
 
@@ -130,7 +130,7 @@ dpp::command_completion_event_t  callback(dpp::confirmation_callback_t value)
     return NULL;
 }
 
-void CDB_DiscordBot::message_cb(cdb_callback_msg * msg)
+void cdb::DiscordBot::message_cb(cdb::callback_msg * msg)
 {
     dpp::message m, s;
     dpp::component c;
@@ -193,7 +193,7 @@ void CDB_DiscordBot::message_cb(cdb_callback_msg * msg)
     }
 }
 
-void CDB_DiscordBot::init(std::string token)
+void cdb::DiscordBot::init(std::string token)
 {
     bot = new dpp::cluster(token);
 
@@ -208,7 +208,7 @@ void CDB_DiscordBot::init(std::string token)
         char dev_id[50];
         char * tmp;
         int index = 0;
-        cdb_callback_msg msg = {CDB_MSG_MAX, "N/A"};
+        cdb::callback_msg msg = {CDB_MSG_MAX, "N/A"};
 
         this->logger->debug("parse message  " + event.custom_id);
 
@@ -256,7 +256,7 @@ void CDB_DiscordBot::init(std::string token)
     bot->start(dpp::st_return);
 }
 
-void CDB_DiscordBot::set_mqtt_handler(CDB_Callback_Class * m_handler)
+void cdb::DiscordBot::set_mqtt_handler(cdb::CallbackClass * m_handler)
 {
     this->m_handler = m_handler;
 }
@@ -266,7 +266,7 @@ void CDB_DiscordBot::set_mqtt_handler(CDB_Callback_Class * m_handler)
  *
  * Set the logger object used for logging
  */
-void CDB_DiscordBot::set_logger(CDB_Logger * l)
+void cdb::DiscordBot::set_logger(cdb::Logger * l)
 {
     this->logger = l;
 }

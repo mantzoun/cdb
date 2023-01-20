@@ -10,7 +10,7 @@
 
 #include "cdb_logger.h"
 
- std::string cdb_log_lvl_str[CDB_LOG_ERROR + 1] =
+std::string cdb_log_lvl_str[cdb::CDB_LOG_ERROR + 1] =
                              {
                                 "DEBUG  ",
                                 "INFO   ",
@@ -18,27 +18,17 @@
                                 "ERROR  "
                              };
 
-CDB_Logger::CDB_Logger(cdb_log_lvl lvl)
+cdb::Logger::Logger(cdb::log_lvl lvl)
 {
     this->set_level(lvl);
 }
 
-/*
- * set_level
- *
- * Set the log level
- */
-void CDB_Logger::set_level(cdb_log_lvl lvl)
+void cdb::Logger::set_level(cdb::log_lvl lvl)
 {
     this->level = lvl;
 }
 
-/*
- * log
- *
- * Print a message to stdout, if it exceeds the configured severity
- */
-void CDB_Logger::log(cdb_log_lvl lvl, std::string s)
+void cdb::Logger::log(cdb::log_lvl lvl, std::string s)
 {
     if (lvl >= this->level){
         time_t now = time(0);
@@ -53,42 +43,22 @@ void CDB_Logger::log(cdb_log_lvl lvl, std::string s)
     }
 }
 
-/*
- * debug
- *
- * wrapper that calls the log() function with DEBUG severity
- */
-void CDB_Logger::debug(std::string s)
+void cdb::Logger::debug(std::string s)
 {
-    this->log(CDB_LOG_DEBUG, s);
+    this->log(cdb::CDB_LOG_DEBUG, s);
 }
 
-/*
- * info
- *
- * wrapper that calls the log() function with INFO severity
- */
-void CDB_Logger::info(std::string s)
+void cdb::Logger::info(std::string s)
 {
-    this->log(CDB_LOG_INFO, s);
+    this->log(cdb::CDB_LOG_INFO, s);
 }
 
-/*
- * warn
- *
- * wrapper that calls the log() function with WANR severity
- */
-void CDB_Logger::warn(std::string s)
+void cdb::Logger::warn(std::string s)
 {
-    this->log(CDB_LOG_WARN, s);
+    this->log(cdb::CDB_LOG_WARN, s);
 }
 
-/*
- * error
- *
- * wrapper that calls the log() function with ERRROR severity
- */
-void CDB_Logger::error(std::string s)
+void cdb::Logger::error(std::string s)
 {
-    this->log(CDB_LOG_ERROR, s);
+    this->log(cdb::CDB_LOG_ERROR, s);
 }

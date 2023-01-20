@@ -5,47 +5,61 @@
 
 #include "cdb_logger.h"
 
-/** Class CDB_IO handles the local input/output for
- * the running process
- *
- * Currently only oneway reading from a named fifo
- * is implemented
- */
-class CDB_IO
-{
-private:
-    bool        fifo_stop;
-    std::thread * fifo_t = NULL;
-    std::string fifo_path;
-    void        * fifo_cb;
-    CDB_Logger  * logger = NULL;
-
-   /**
-    * fifo_read
-    *
-    * read from the defined named fifo
-    */
-    void    fifo_read(void);
-
-public:
-    /** Default constructor
-     */
-            CDB_IO(void);
-    /** Initialize the named fifo
+namespace cdb {
+    /**
+     * @class IO
      *
-     * Start the thread that will parse input from the fifo
-     */
-    bool    fifo_init(std::string, void *);
-
-    /** Terminate the fifo
+     * @brief Class CDB_IO handles the local input/output for
+     *        the running process
      *
-     * stop the fifo_read thread
+     *        Currently only oneway reading from a named fifo
+     *        is implemented
      */
-    void    fifo_terminate(void);
+    class IO
+    {
+    private:
+        bool        fifo_stop;
+        std::thread * fifo_t = NULL;
+        std::string fifo_path;
+        void        * fifo_cb;
+        cdb::Logger * logger = NULL;
 
-    /** Set the logger object
-     */
-    void    set_logger(CDB_Logger *);
-};
+       /**
+        * fifo_read
+        *
+        * read from the defined named fifo
+        */
+        void fifo_read(void);
+
+    public:
+        /**
+         * @brief Default constructor
+         */
+        IO(void);
+
+        /**
+         * @brief Initialize the named fifo
+         *
+         *        Start the thread that will parse input from the fifo
+         *
+         * @return true if in case os success
+         */
+        bool fifo_init(std::string, void *);
+
+        /**
+         * @brief Terminate the fifo
+         *
+         *        stop the fifo_read thread
+         */
+        void fifo_terminate(void);
+
+        /**
+         * @brief Set the logger object
+         *
+         * @param logger The logger object
+         */
+        void set_logger(cdb::Logger * logger);
+    };
+}
 
 #endif /* __CDB_IO__H */

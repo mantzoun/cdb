@@ -12,18 +12,51 @@
 #include "cdb_logger.h"
 #include "cdb_mqtt_handler.h"
 
-class CDB_DiscordBot : public CDB_Callback_Class
-{
-    private:
-        CDB_Logger * logger = NULL;
-        CDB_Callback_Class * m_handler = NULL;
+namespace cdb {
+    /**
+     * @class DiscordBot
+     *
+     * @brief The bot will run on the DPP library to connect to
+     *        discord, and offer a callback function for message
+     *        posting
+     */
+    class DiscordBot : public cdb::CallbackClass
+    {
+        private:
+            cdb::Logger * logger = NULL;
+            cdb::CallbackClass * m_handler = NULL;
 
-    public:
-        CDB_DiscordBot(void);
-        void init(std::string);
-        void set_logger(CDB_Logger *);
-        void set_mqtt_handler(CDB_Callback_Class *);
-        void message_cb(cdb_callback_msg *msg);
-};
+        public:
+            DiscordBot(void);
+
+            /**
+             * @brief Initiaze the bot
+             *
+             * @param token Thi discord authentication token
+             */
+            void init(std::string token);
+
+            /**
+             * @brief set the logger object
+             *
+             * @param logger The logger object
+             */
+            void set_logger(cdb::Logger * logger);
+
+            /**
+             * @brief set the MQTT handler
+             *
+             * @param m_handler the MQTT handler object
+             */
+            void set_mqtt_handler(cdb::CallbackClass * m_handler);
+
+            /**
+             * @brief Post a message to discord
+             *
+             * @param msg The message information
+             */
+            void message_cb(cdb::callback_msg *msg);
+    };
+}
 
 #endif /* CDB_DISCORD_BOT__H */

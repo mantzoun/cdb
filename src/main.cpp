@@ -1,7 +1,5 @@
 /*
  * main.cpp
- *
- * initialize logger object and i/o thread.
  */
 
 #include <stdio.h>
@@ -18,7 +16,7 @@
 #include "cdb_mqtt_handler.h"
 
 
-static CDB_DiscordBot bot;
+static cdb::DiscordBot bot;
 
 int main(int argc, char** argv)
 {
@@ -29,11 +27,11 @@ int main(int argc, char** argv)
 
     std::string config_file = argv[1];
 
-    CDB_Logger logger = CDB_Logger(CDB_LOG_DEBUG);
+    cdb::Logger logger = cdb::Logger(cdb::CDB_LOG_DEBUG);
 
-    CDB_IO io;
-    CDB_Configurator conf;
-    CDB_MQTT_Handler m_handler;
+    cdb::IO io;
+    cdb::Configurator conf;
+    cdb::MqttHandler m_handler;
 
     m_handler.set_logger(&logger);
     io.set_logger(&logger);

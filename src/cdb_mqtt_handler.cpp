@@ -5,8 +5,8 @@
 
 #include "cdb_mqtt_handler.h"
 
-CDB_Logger * CDB_MQTT_Handler::logger;
-CDB_Callback_Class * my_bot;
+cdb::Logger * cdb::MqttHandler::logger;
+cdb::CallbackClass * my_bot;
 
 static std::map<std::string, std::string> stat_topic_map;
 static std::map<std::string, std::string> cmnd_topic_map;
@@ -23,38 +23,38 @@ static void on_disconnect(mosquitto * m, void *obj, int res)
 
 static void on_message(mosquitto * m, void *obj, const mosquitto_message *message)
 {
-    cdb_msg_t type = CDB_MSG_MAX;
+    cdb::msg_t type = cdb::CDB_MSG_MAX;
     printf("mqtt message %s\n", (char*) message->payload);
     if (stat_topic_map.find(message->topic) != stat_topic_map.end()){
         if (strcmp((char*) message->payload, "ON") == 0){
-            type = CDB_MSG_DISC_MQTT_DEV_STATUS_ON;
+            type = cdb::CDB_MSG_DISC_MQTT_DEV_STATUS_ON;
         } else if (strcmp((char*) message->payload, "OFF") == 0){
-            type = CDB_MSG_DISC_MQTT_DEV_STATUS_OFF;
+            type = cdb::CDB_MSG_DISC_MQTT_DEV_STATUS_OFF;
         }
 
         std::cout << "device " + stat_topic_map[message->topic] + "\n";
-        cdb_callback_msg  msg = {type, stat_topic_map[message->topic]};
+        cdb::callback_msg  msg = {type, stat_topic_map[message->topic]};
         my_bot->message_cb(&msg);
     }
 }
 
-CDB_MQTT_Handler::CDB_MQTT_Handler(void)
+cdb::MqttHandler::MqttHandler(void)
 {
 }
 
-void CDB_MQTT_Handler::set_logger(CDB_Logger * l)
+void cdb::MqttHandler::set_logger(cdb::Logger * l)
 {
     logger = l;
 }
 
-void CDB_MQTT_Handler::set_discord_bot(CDB_Callback_Class * disc_bot)
+void cdb::MqttHandler::set_discord_bot(cdb::CallbackClass * disc_bot)
 {
     this->bot = disc_bot;
     my_bot = disc_bot;
     std::cout << "bot is now " << my_bot << "\n";
 }
 
-void CDB_MQTT_Handler::message_cb(cdb_callback_msg * msg)
+void cdb::MqttHandler::message_cb(cdb::callback_msg * msg)
 {
     const char * cmd_on   = "1";
     const char * cmd_off  = "0";
@@ -75,22 +75,22 @@ void CDB_MQTT_Handler::message_cb(cdb_callback_msg * msg)
     }
 }
 
-void CDB_MQTT_Handler::mosq_logger(mosquitto *mosq, void *obj, int level, const char *str)
+void cdb::MqttHandler::mosq_logger(mosquitto *mosq, void *obj, int level, const char *str)
 {
     std::string msg = str;
     logger->debug("MQTT Handler: " + msg);
 }
 
-void CDB_MQTT_Handler::init(CDB_Configurator * conf)
+void cdb::MqttHandler::init(cdb::Configurator * conf)
 {
-    CDB_MQTT_Server * broker = conf->inventory.mqtt_server();
+    cdb::MqttServer * broker = conf->inventory.mqtt_server();
 
     if (broker == NULL) {
         logger->info("No MQTT broker configured, skipping MQTT setup");
         return;
     }
 
-    std::list<CDB_MQTT_Device *> * l = conf->inventory.mqtt_dev_list();
+    std::list<cdb::MqttDevice *> * l = conf->inventory.mqtt_dev_list();
 
     if (l == NULL) {
         logger->info("No MQTT devices configured, skipping MQTT setup");
@@ -112,17 +112,17 @@ void CDB_MQTT_Handler::init(CDB_Configurator * conf)
     mosquitto_disconnect_callback_set(this->mosq, &on_disconnect);
     mosquitto_message_callback_set(this->mosq, &on_message);
 
-    mosquitto_log_callback_set(this->mosq, &CDB_MQTT_Handler::mosq_logger);
+    mosquitto_log_callback_set(this->mosq, &cdb::MqttHandler::mosq_logger);
 
     this->connect(broker);
 
     mosquitto_loop_start(this->mosq);
 
-    std::list<CDB_MQTT_Device *>::iterator it;
+    std::list<cdb::MqttDevice *>::iterator it;
     for (it = l->begin(); it != l->end(); ++it){
         logger->info("Adding device " + (*it)->name());
         this->add_device(*it);
-        cdb_callback_msg msg = { CDB_MSG_DISC_MQTT_DEV_ADD,
+        cdb::callback_msg msg = { CDB_MSG_DISC_MQTT_DEV_ADD,
                                  (*it)->name()};
         stat_topic_map[(*it)->stat()] = (*it)->name();
         cmnd_topic_map[(*it)->name()] = (*it)->cmnd();
@@ -130,7 +130,7 @@ void CDB_MQTT_Handler::init(CDB_Configurator * conf)
     }
 }
 
-int CDB_MQTT_Handler::connect(CDB_MQTT_Server * conf)
+int cdb::MqttHandler::connect(cdb::MqttServer * conf)
 {
     int res = mosquitto_connect(this->mosq, conf->addr().c_str(), conf->port(), 30);
     if (MOSQ_ERR_SUCCESS != res){
@@ -142,12 +142,12 @@ int CDB_MQTT_Handler::connect(CDB_MQTT_Server * conf)
     return CDB_OK;
 }
 
-void CDB_MQTT_Handler::add_device(CDB_MQTT_Device * device)
+void cdb::MqttHandler::add_device(cdb::MqttDevice * device)
 {
     mosquitto_subscribe(this->mosq, NULL, device->stat().c_str(), 1);
 }
 
-void CDB_MQTT_Handler::publish(const char * topic, int payload_len, const void * payload)
+void cdb::MqttHandler::publish(const char * topic, int payload_len, const void * payload)
 {
     mosquitto_publish(this->mosq, NULL, topic, payload_len, payload, 1, false);
 }

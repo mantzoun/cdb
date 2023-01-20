@@ -5,7 +5,7 @@
 #include "cdb_configurator.h"
 #include "cdb_mqtt_device.h"
 
-int CDB_Configurator::conf_line_parser(std::string parameter_array[], std::string line, int num_of_arguments)
+int cdb::Configurator::conf_line_parser(std::string parameter_array[], std::string line, int num_of_arguments)
 {
     std::stringstream conf(line);
 
@@ -28,12 +28,12 @@ int CDB_Configurator::conf_line_parser(std::string parameter_array[], std::strin
     return CDB_OK;
 }
 
-void CDB_Configurator::parse_mqtt_server(std::string line)
+void cdb::Configurator::parse_mqtt_server(std::string line)
 {
     std::string items[CDB_CONF_MQTT_SERVER_PARAMS];
 
     if (CDB_OK == this->conf_line_parser(items, line, sizeof(items)/sizeof(items[0]))) {
-        CDB_MQTT_Server * s = new CDB_MQTT_Server(items[CDB_CONF_MQTT_SERVER_ADDR],
+        cdb::MqttServer * s = new cdb::MqttServer(items[CDB_CONF_MQTT_SERVER_ADDR],
                                             std::stoi(items[CDB_CONF_MQTT_SERVER_PORT]),
                                             items[CDB_CONF_MQTT_SERVER_USERNAME],
                                             items[CDB_CONF_MQTT_SERVER_PASSWORD],
@@ -43,12 +43,12 @@ void CDB_Configurator::parse_mqtt_server(std::string line)
     }
 }
 
-void CDB_Configurator::parse_mqtt_device(std::string line)
+void cdb::Configurator::parse_mqtt_device(std::string line)
 {
     std::string items[CDB_CONF_MQTT_DEVICE_PARAMS];
 
     if (CDB_OK == this->conf_line_parser(items, line, sizeof(items)/sizeof(items[0]))) {
-        CDB_MQTT_Device * d = new CDB_MQTT_Device(items[CDB_CONF_MQTT_DEVICE_NAME],
+        cdb::MqttDevice * d = new cdb::MqttDevice(items[CDB_CONF_MQTT_DEVICE_NAME],
                                             items[CDB_CONF_MQTT_DEVICE_CMND],
                                             items[CDB_CONF_MQTT_DEVICE_STAT]);
         this->logger->debug("Parsed MQTT device configuration for " + d->name());
@@ -56,7 +56,7 @@ void CDB_Configurator::parse_mqtt_device(std::string line)
     }
 }
 
-void CDB_Configurator::parse_discord_token(std::string line)
+void cdb::Configurator::parse_discord_token(std::string line)
 {
     std::string items[CDB_CONF_DISCORD_PARAMS];
 
@@ -66,7 +66,7 @@ void CDB_Configurator::parse_discord_token(std::string line)
     }
 }
 
-void CDB_Configurator::parse_line(std::string line)
+void cdb::Configurator::parse_line(std::string line)
 {
     std::string type;
     std::stringstream conf(line);
@@ -90,7 +90,7 @@ void CDB_Configurator::parse_line(std::string line)
     }
 }
 
-void CDB_Configurator::config_read(std::string file)
+void cdb::Configurator::config_read(std::string file)
 {
     std::string line;
 
@@ -101,21 +101,21 @@ void CDB_Configurator::config_read(std::string file)
     }
 }
 
-CDB_Configurator::CDB_Configurator(void)
+cdb::Configurator::Configurator(void)
 {
 }
 
-std::string CDB_Configurator::discord_token(void)
+std::string cdb::Configurator::discord_token(void)
 {
     return this->_discord_token;
 }
 
-void CDB_Configurator::set_discord_token(std::string token)
+void cdb::Configurator::set_discord_token(std::string token)
 {
     this->_discord_token = token;
 }
 
-void CDB_Configurator::set_logger(CDB_Logger * logger)
+void cdb::Configurator::set_logger(cdb::Logger * logger)
 {
     this->logger = logger;
 }

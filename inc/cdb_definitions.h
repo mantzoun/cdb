@@ -27,23 +27,26 @@
 #define CDB_CONF_MQTT_SERVER_CLIENT_ID      5
 #define CDB_CONF_MQTT_SERVER_PARAMS         6
 
-/** Enum of all cdb message types
- *
- *  used for messages sent to objects derived
- *  from the CDB_Callback_Class
- */
-enum cdb_msg_t {
-    // MESSAGES -> DISCORD BOT
-    CDB_MSG_DISC_MQTT_DEV_ADD,
-    CDB_MSG_DISC_MQTT_DEV_STATUS_ON,
-    CDB_MSG_DISC_MQTT_DEV_STATUS_OFF,
+namespace cdb {
+    /**
+      * @brief Enum of all cdb message types
+      *
+      *        used for messages sent to objects derived
+      *        from the Callback_Class
+      */
+    enum msg_t {
+        // MESSAGES -> DISCORD BOT
+        CDB_MSG_DISC_MQTT_DEV_ADD,
+        CDB_MSG_DISC_MQTT_DEV_STATUS_ON,
+        CDB_MSG_DISC_MQTT_DEV_STATUS_OFF,
 
-    // MESSAGES -> MQTT HANDLER
-    CDB_MSG_MQTT_HANDLER_TURN_DEVICE_ON,
-    CDB_MSG_MQTT_HANDLER_TURN_DEVICE_OFF,
-    CDB_MSG_MQTT_HANDLER_POLL_DEVICE_STATUS,
+        // MESSAGES -> MQTT HANDLER
+        CDB_MSG_MQTT_HANDLER_TURN_DEVICE_ON,
+        CDB_MSG_MQTT_HANDLER_TURN_DEVICE_OFF,
+        CDB_MSG_MQTT_HANDLER_POLL_DEVICE_STATUS,
 
-    CDB_MSG_MAX
-};
+        CDB_MSG_MAX
+    };
+}
 
 #endif /* CDB_DEFINITIONS__H */
