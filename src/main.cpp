@@ -27,7 +27,7 @@ int main(int argc, char** argv)
 
     std::string config_file = argv[1];
 
-    cdb::Logger logger = cdb::Logger(cdb::CDB_LOG_DEBUG);
+    cdb::Logger logger = cdb::Logger(cdb::CDB_LOG_INFO);
 
     cdb::IO io;
     cdb::Configurator conf;
