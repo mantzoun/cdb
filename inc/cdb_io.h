@@ -4,6 +4,7 @@
 #include<thread>
 
 #include "cdb_logger.h"
+#include "cdb_discord_bot.h"
 
 namespace cdb {
     /**
@@ -23,6 +24,7 @@ namespace cdb {
         std::string fifo_path;
         void        * fifo_cb;
         cdb::Logger * logger = NULL;
+        cdb::CallbackClass * bot;
 
        /**
         * fifo_read
@@ -42,9 +44,11 @@ namespace cdb {
          *
          *        Start the thread that will parse input from the fifo
          *
+         * @param fifo The path of the fifo
+         *
          * @return true if in case os success
          */
-        bool fifo_init(std::string, void *);
+        bool fifo_init(std::string fifo);
 
         /**
          * @brief Terminate the fifo
@@ -59,6 +63,16 @@ namespace cdb {
          * @param logger The logger object
          */
         void set_logger(cdb::Logger * logger);
+
+        /**
+         * @brief Set a pointer to the discord bot module
+         *
+         *        The bot is able to receive messages from the
+         *        IO.
+         *
+         * @param bot The discord bot object
+         */
+        void set_discord_bot(cdb::CallbackClass * bot);
     };
 }
 

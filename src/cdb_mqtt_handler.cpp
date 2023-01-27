@@ -4,6 +4,7 @@
 #include "iostream"
 
 #include "cdb_mqtt_handler.h"
+#include "cdb_discord_bot.h"
 
 cdb::Logger * cdb::MqttHandler::logger;
 cdb::CallbackClass * my_bot;

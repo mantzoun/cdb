@@ -40,7 +40,7 @@ int main(int argc, char** argv)
     logger.info("Reading config file");
     conf.config_read(config_file);
 
-    io.fifo_init("/tmp/mqtt_disc_cpp.fifo", NULL);
+    io.fifo_init("/tmp/mqtt_disc_cpp.fifo");
 
     logger.info("Starting Discord Bot\n");
     bot.set_logger(&logger);
@@ -49,6 +49,8 @@ int main(int argc, char** argv)
 
     m_handler.set_discord_bot(&bot);
     m_handler.init(&conf);
+
+    io.set_discord_bot(&bot);
 
     logger.info("Init done, entering loop");
 

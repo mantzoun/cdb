@@ -27,6 +27,11 @@
 #define CDB_CONF_MQTT_SERVER_CLIENT_ID      5
 #define CDB_CONF_MQTT_SERVER_PARAMS         6
 
+#define CDB_IO_FIELD_TYPE                   0
+#define CDB_IO_FIELD_CHANNEL                1
+#define CDB_IO_FIELD_CONTENT                2
+#define CDB_IO_FIELD_TOTAL                  3
+
 namespace cdb {
     /**
       * @brief Enum of all cdb message types
@@ -39,6 +44,9 @@ namespace cdb {
         CDB_MSG_DISC_MQTT_DEV_ADD,
         CDB_MSG_DISC_MQTT_DEV_STATUS_ON,
         CDB_MSG_DISC_MQTT_DEV_STATUS_OFF,
+
+        CDB_MSG_DISC_POST_MESSAGE,
+        CDB_MSG_DISC_POST_FILE,
 
         // MESSAGES -> MQTT HANDLER
         CDB_MSG_MQTT_HANDLER_TURN_DEVICE_ON,
