@@ -20,4 +20,6 @@ CDB also listens on a named FIFO for additional instructions. Currently supporte
   * File post: echo "FILE#CHANNEL#PATH_TO_FILE#" > /path_to_fifo
 
 ## More information
+For unit testing, the [Cpputest](https://cpputest.github.io/) framework is used
+
 information on the project can be found [here](https://www.mantzouneas.gr/projects/cdb/) (page in Greek).

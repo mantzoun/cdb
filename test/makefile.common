@@ -1,0 +1,14 @@
+export CPPUTEST_HOME = ../cpputest
+export SRC_HOME = ../src
+export INC_HOME = ../inc
+export MOCK_HOME = mocks
+export BIN_HOME = bin
+
+export CXXFLAGS += -include $(CPPUTEST_HOME)/include/CppUTest/MemoryLeakDetectorNewMacros.h
+export CFLAGS += -include $(CPPUTEST_HOME)/include/CppUTest/MemoryLeakDetectorMallocMacros.h
+export LD_LIBRARIES = -L$(CPPUTEST_HOME)/lib -lCppUTest -lCppUTestExt -pthread
+
+export INCLUDE_DIRS += $(CPPUTEST_HOME)/include $(INC_HOME)
+
+export CPPUTEST_OBJS_DIR = obj
+export CPPUTEST_LIB_DIR = lib

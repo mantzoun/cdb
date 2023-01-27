@@ -86,17 +86,19 @@ bool cdb::IO::fifo_init(std::string path)
     return true;
 }
 
-void cdb::IO::fifo_terminate()
+bool cdb::IO::fifo_terminate()
 {
     if (this->fifo_t == NULL){
          this->logger->warn("CDB_IO: IO thread not running");
-        return;
+        return false;
     }
 
     this->fifo_stop = true;
     this->fifo_t->join();
     delete this->fifo_t;
     this->fifo_t = NULL;
+
+    return true;
 }
 
 void cdb::IO::set_logger(cdb::Logger * l)

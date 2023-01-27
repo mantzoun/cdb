@@ -54,8 +54,10 @@ namespace cdb {
          * @brief Terminate the fifo
          *
          *        stop the fifo_read thread
+         *
+         * @return true if the thread was running and was terminated, false otherwise
          */
-        void fifo_terminate(void);
+        bool fifo_terminate(void);
 
         /**
          * @brief Set the logger object
