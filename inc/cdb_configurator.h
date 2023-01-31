@@ -21,8 +21,10 @@ namespace cdb {
         private:
             cdb::Logger * logger;
             std::string _discord_token;
+            cdb::log_lvl log_level = CDB_LOG_DEBUG;
 
             int  conf_line_parser(std::string * parameter_array, std::string line, int num_of_arguments);
+            void parse_log_level(std::string line);
             void parse_discord_token(std::string line);
             void parse_mqtt_device(std::string line);
             void parse_mqtt_server(std::string line);
@@ -57,7 +59,7 @@ namespace cdb {
             /**
              * @brief Getter function for the discord bot API token
              *
-             * @return THe discord token
+             * @return The discord token
              *
              */
             std::string discord_token(void);
@@ -68,6 +70,14 @@ namespace cdb {
              * @param token The Discord token
              */
             void set_discord_token(std::string token);
+
+            /**
+             * @brief Getter function for the log level
+             *
+             * @return The log level
+             *
+             */
+            cdb::log_lvl get_log_level(void);
     };
 }
 

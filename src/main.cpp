@@ -27,18 +27,20 @@ int main(int argc, char** argv)
 
     std::string config_file = argv[1];
 
-    cdb::Logger logger = cdb::Logger(cdb::CDB_LOG_INFO);
+    cdb::Logger logger = cdb::Logger(cdb::CDB_LOG_DEBUG);
 
     cdb::IO io;
     cdb::Configurator conf;
     cdb::MqttHandler m_handler;
 
+    conf.set_logger(&logger);
+    conf.config_read(config_file);
+    logger.set_level(conf.get_log_level());
+
     m_handler.set_logger(&logger);
     io.set_logger(&logger);
-    conf.set_logger(&logger);
 
     logger.info("Reading config file");
-    conf.config_read(config_file);
 
     io.fifo_init("/tmp/mqtt_disc_cpp.fifo");
 
