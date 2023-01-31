@@ -25,6 +25,7 @@ namespace cdb {
             static cdb::Logger * logger;
             mosquitto * mosq;
             cdb::CallbackClass * bot;
+            cdb::Configurator * conf;
 
             void (cdb::MqttHandler::*loggerptr)(mosquitto *, void *, int, const char *);
 
@@ -93,6 +94,23 @@ namespace cdb {
              * @param msg The message information
              */
             void message_cb(cdb::callback_msg * msg);
+
+            /**
+             * @brief To be called by the mosquitto callback
+             */
+            void on_connect_cb(void);
+
+            /**
+             * @brief To be called by the mosquitto callback
+             */
+            void on_disconnect_cb(void);
+
+            /**
+             * @brief To be called by the mosquitto callback
+             *
+             * @param message The message received
+             */
+            void on_message_cb(const mosquitto_message *message);
     };
 }
 
