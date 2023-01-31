@@ -26,11 +26,10 @@ cdb::DiscordBot::DiscordBot(void)
 
 dpp::command_completion_event_t existing_devices(dpp::confirmation_callback_t value)
 {
-    std::cout << "devices init Callback\n";
+    bot->log(dpp::ll_debug, "devices init Callback");
     if ( value.is_error() == true ){
-        std::cout << "Error\n";
         dpp::error_info err = value.get_error();
-        std::cout << err.message;
+        bot->log(dpp::ll_error, "Error " + err.message);
     }
 
     dpp::message_map map = std::get<dpp::message_map>(value.value);
@@ -48,7 +47,7 @@ dpp::command_completion_event_t existing_devices(dpp::confirmation_callback_t va
                 device_name = m.content.substr(0, fs);
             }
 
-            std::cout << "found message for " + device_name + "\n";
+            bot->log(dpp::ll_debug, "found message for " + device_name);
             device_map[device_name] = m.id;
         }
     }
@@ -58,17 +57,16 @@ dpp::command_completion_event_t existing_devices(dpp::confirmation_callback_t va
 
 dpp::command_completion_event_t my_message_cb(dpp::confirmation_callback_t value)
 {
-    std::cout << "message Callback\n";
+    bot->log(dpp::ll_debug, "message Callback");
     if ( value.is_error() == true ){
-        std::cout << "Error\n";
         dpp::error_info err = value.get_error();
-        std::cout << err.message;
+        bot->log(dpp::ll_error, "Error " + err.message);
     }
 
     dpp::message m = std::get<dpp::message>(value.value);
 
     if (m.channel_id == devices_sf) {
-        std::cout << "Got respose for " + m.content + "\n";
+        bot->log(dpp::ll_debug, "Got respose for " + m.content);
         device_map[m.content] = m.id;
     }
 
@@ -77,11 +75,10 @@ dpp::command_completion_event_t my_message_cb(dpp::confirmation_callback_t value
 
 dpp::command_completion_event_t  channels_cb(dpp::confirmation_callback_t value)
 {
-    std::cout << "channel Callback\n";
+    bot->log(dpp::ll_debug, "channel Callback");
     if ( value.is_error() == true ){
-        std::cout << "Error\n";
         dpp::error_info err = value.get_error();
-        std::cout << err.message;
+        bot->log(dpp::ll_error, "Error " + err.message);
     }
 
     dpp::channel_map channelmap = std::get<dpp::channel_map>(value.value);
@@ -93,7 +90,7 @@ dpp::command_completion_event_t  channels_cb(dpp::confirmation_callback_t value)
         id = it.first;
         c = it.second;
 
-        std::cout << c.name + "\n";
+        bot->log(dpp::ll_debug, c.name);
 
         if (c.name == "syslog") {
             syslog_sf = id;
@@ -108,11 +105,10 @@ dpp::command_completion_event_t  channels_cb(dpp::confirmation_callback_t value)
 
 dpp::command_completion_event_t  callback(dpp::confirmation_callback_t value)
 {
-    std::cout << "Callback\n";
+    bot->log(dpp::ll_debug, "Callback");
     if ( value.is_error() == true ){
-        std::cout << "Error\n";
         dpp::error_info err = value.get_error();
-        std::cout << err.message;
+        bot->log(dpp::ll_error, "Error " + err.message);
     }
 
     dpp::guild_map guildmap = std::get<dpp::guild_map>(value.value);
@@ -197,7 +193,27 @@ void cdb::DiscordBot::init(std::string token)
 {
     bot = new dpp::cluster(token);
 
-    bot->on_log(dpp::utility::cout_logger());
+    // Use our own logger for output consistency
+    bot->on_log([this](const dpp::log_t & event) {
+    switch (event.severity) {
+        case dpp::ll_trace:
+        case dpp::ll_debug:
+            this->logger->debug("Discord Bot: " + event.message);
+            break;
+        case dpp::ll_info:
+            this->logger->info("Discord Bot: " +  event.message);
+            break;
+        case dpp::ll_warning:
+            this->logger->warn("Discord Bot: " + event.message);
+            break;
+        case dpp::ll_error:
+        case dpp::ll_critical:
+        default:
+            this->logger->error("Discord Bot: " + event.message);
+            break;
+        }
+  });
+
 
     bot->on_button_click([this](const dpp::button_click_t & event) {
         /* Button clicks are still interactions, and must be replied to in some form to
@@ -249,7 +265,7 @@ void cdb::DiscordBot::init(std::string token)
             );
         }
 
-        std::cout << "API call\n";
+        bot->log(dpp::ll_debug, "API call");
         bot->current_user_get_guilds(&callback);
     });
 
