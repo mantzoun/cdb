@@ -15,7 +15,11 @@ There is no handling at the moment for multiple Discord Guilds, it is assumed th
 For these purposes, the application uses the [DPP](https://dpp.dev/) and [Eclipse mosquitto](https://mosquitto.org/) libraries.
 
 ## I/O
-CDB also listens on a named FIFO for additional instructions (not implemented)
+CDB also listens on a named FIFO for additional instructions. Currently supported are text and file posts, in the following formats:
+  * Text post: echo "TEXT#CHANNEL#MESSAGE#" > /path_to_fifo
+  * File post: echo "FILE#CHANNEL#PATH_TO_FILE#" > /path_to_fifo
 
 ## More information
+For unit testing, the [Cpputest](https://cpputest.github.io/) framework is used
+
 information on the project can be found [here](https://www.mantzouneas.gr/projects/cdb/) (page in Greek).

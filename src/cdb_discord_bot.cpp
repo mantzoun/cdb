@@ -15,9 +15,7 @@
 
 static dpp::cluster * bot;
 
-static dpp::snowflake syslog_sf;
-static dpp::snowflake devices_sf;
-
+static std::map<std::string, dpp::snowflake> channel_map;
 static std::map<std::string, dpp::snowflake> device_map;
 
 cdb::DiscordBot::DiscordBot(void)
@@ -38,7 +36,7 @@ dpp::command_completion_event_t existing_devices(dpp::confirmation_callback_t va
         std::string device_name;
         dpp::message m = it.second;
 
-        if (m.channel_id == devices_sf){
+        if (m.channel_id == channel_map["devices"]){
             size_t fs = m.content.find(" ");
 
             if (fs == std::string::npos){
@@ -65,7 +63,7 @@ dpp::command_completion_event_t my_message_cb(dpp::confirmation_callback_t value
 
     dpp::message m = std::get<dpp::message>(value.value);
 
-    if (m.channel_id == devices_sf) {
+    if (m.channel_id == channel_map["devices"]) {
         bot->log(dpp::ll_debug, "Got respose for " + m.content);
         device_map[m.content] = m.id;
     }
@@ -91,12 +89,10 @@ dpp::command_completion_event_t  channels_cb(dpp::confirmation_callback_t value)
         c = it.second;
 
         bot->log(dpp::ll_debug, c.name);
+        channel_map[c.name] = id;
 
-        if (c.name == "syslog") {
-            syslog_sf = id;
-        } else if (c.name == "devices") {
-            devices_sf = id;
-            bot->messages_get(devices_sf, 0, 0, 0, 0, &existing_devices);
+        if (c.name == "devices") {
+            bot->messages_get(id, 0, 0, 0, 0, &existing_devices);
         }
     }
 
@@ -132,27 +128,29 @@ void cdb::DiscordBot::message_cb(cdb::callback_msg * msg)
     dpp::component c;
     dpp::component ar;
 
-    bot->log(dpp::ll_debug, "received message");
-    bot->log(dpp::ll_debug, "received message " + msg->content);
+    std::string content = msg->content;
+    std::string channel = msg->channel;
+
+    bot->log(dpp::ll_debug, "received message " + std::to_string(msg->type) + " : " + content + " : " + channel);
     switch(msg->type){
         case CDB_MSG_DISC_MQTT_DEV_ADD:
-            if (device_map.find(msg->content) == device_map.end()){
-                bot->log(dpp::ll_debug, "message not found for " + msg->content);
-                m.channel_id = devices_sf;
-                m.content    = msg->content;
+            if (device_map.find(content) == device_map.end()){
+                bot->log(dpp::ll_debug, "message not found for " + content);
+                m.channel_id = channel_map["devices"];
+                m.content    = content;
 
                 ar.set_type(dpp::cot_action_row);
 
                 c.set_style(dpp::cos_success);
                 c.set_label("ON");
-                c.set_id(msg->content + "#ON");
+                c.set_id(content + "#ON");
                 c.set_type(dpp::cot_button);
 
                 ar.add_component(c);
 
                 c.set_style(dpp::cos_danger);
                 c.set_label("OFF");
-                c.set_id(msg->content + "#OFF");
+                c.set_id(content + "#OFF");
                 c.set_type(dpp::cot_button);
 
                 ar.add_component(c);
@@ -161,28 +159,41 @@ void cdb::DiscordBot::message_cb(cdb::callback_msg * msg)
 
                 bot->message_create(m, &my_message_cb);
             } else {
-                bot->log(dpp::ll_debug, "message found for " + msg->content + ". Skipping");
+                bot->log(dpp::ll_debug, "message found for " + content + ". Skipping");
             }
             break;
         case CDB_MSG_DISC_MQTT_DEV_STATUS_ON:
         case CDB_MSG_DISC_MQTT_DEV_STATUS_OFF:
-            if (device_map.find(msg->content) == device_map.end()){
-                bot->log(dpp::ll_warning, "status message not found for " + msg->content);
+            if (device_map.find(content) == device_map.end()){
+                bot->log(dpp::ll_warning, "status message not found for " + content);
                 return;
             }
 
-            m = bot->message_get_sync(device_map[msg->content], devices_sf);
+            m = bot->message_get_sync(device_map[content], channel_map["devices"]);
             if (msg->type == CDB_MSG_DISC_MQTT_DEV_STATUS_ON){
-                m.content    = msg->content + " is ON";
+                m.content    = content + " is ON";
             } else if (msg->type == CDB_MSG_DISC_MQTT_DEV_STATUS_OFF){
-                m.content    = msg->content + " is OFF";
+                m.content    = content + " is OFF";
             }
 
-            s.channel_id = syslog_sf;
+            s.channel_id = channel_map["syslog"];
             s.content    = m.content;
 
             bot->message_edit(m, &my_message_cb);
             bot->message_create(s, &my_message_cb);
+            break;
+        case CDB_MSG_DISC_POST_FILE:
+            m.channel_id = channel_map[channel];
+            m.add_file(content.substr(content.find_last_of("\\/"), content.size()),
+                       dpp::utility::read_file(content));
+
+            bot->message_create(m, &my_message_cb);
+            break;
+        case CDB_MSG_DISC_POST_MESSAGE:
+            m.channel_id = channel_map[channel];
+            m.content    = content;
+
+            bot->message_create(m, &my_message_cb);
             break;
         default:
             break;

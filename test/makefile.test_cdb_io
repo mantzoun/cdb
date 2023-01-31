@@ -1,0 +1,17 @@
+include makefile.common
+
+COMPONENT_NAME = CDB_IO
+
+TEST_TARGET = $(BIN_HOME)/$(COMPONENT_NAME)_test
+
+TEST_SRC_FILES += test_cdb_io.cpp
+SRC_FILES += $(SRC_HOME)/cdb_io.cpp
+MOCKS_SRC_FILES = $(MOCK_HOME)/mock_cdb_logger.cpp
+
+#CPPUTEST_ENABLE_DEBUG
+#CPPUTEST_USE_MEM_LEAK_DETECTION
+#CPPUTEST_USE_GCOV
+
+include $(CPPUTEST_HOME)/build/MakefileWorker.mk
+
+my_test: vtest

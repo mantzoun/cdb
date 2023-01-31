@@ -15,6 +15,7 @@ namespace cdb {
     {
         cdb::msg_t  type;       /*!< Messge type */
         std::string content;    /*!< Messge content */
+        std::string channel;    /*!< Channel to post the message to */
     };
 
     /**
