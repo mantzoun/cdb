@@ -10,6 +10,10 @@ DOX = doxygen
 DOXYFILE = Doxyfile
 
 CC = g++
+
+DISTCC = distcc
+DISTCC_HOSTS=127.0.0.1:9999
+
 CFLAGS = -Wall -g -std=c++17
 INCLUDES = -I$(INCDIR) \
            -IDPP/include \
@@ -25,9 +29,13 @@ SRC = $(addprefix $(SRCDIR)/,$(FILES))
 OBJ = $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o, $(SRC))
 BIN = $(BINDIR)/cdb
 
-.PHONY: all clean dox
+.PHONY: all dist clean dox
 
 all: $(BIN)
+
+dist: CC = $(DISTCC)
+dist: LIB += -lstdc++
+dist: | all
 
 $(BIN): $(OBJ) | $(BINDIR)
 	$(CC) -o $(BIN) $(OBJ) $(LIB)
