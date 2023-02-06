@@ -76,12 +76,13 @@ void cdb::Configurator::parse_mqtt_device(std::string line)
     }
 }
 
-void cdb::Configurator::parse_discord_token(std::string line)
+void cdb::Configurator::parse_discord_config(std::string line)
 {
     std::string items[CDB_CONF_DISCORD_PARAMS];
 
     if (CDB_OK == this->conf_line_parser(items, line, CDB_CONF_DISCORD_PARAMS)) {
         this->set_discord_token(items[CDB_CONF_DISCORD_TOKEN]);
+        this->set_discord_bot_id(items[CDB_CONF_DISCORD_BOT_ID]);
         this->logger->debug("Parsed discord token configuration");
     }
 }
@@ -103,8 +104,8 @@ void cdb::Configurator::parse_line(std::string line)
         this->parse_mqtt_device(line);
     } else if (type == "mqtt_server") {
         this->parse_mqtt_server(line);
-    } else if (type == "discord_token") {
-        this->parse_discord_token(line);
+    } else if (type == "discord") {
+        this->parse_discord_config(line);
     } else if (type == "log-level") {
         this->parse_log_level(line);
     } else {
@@ -132,6 +133,11 @@ std::string cdb::Configurator::discord_token(void)
     return this->_discord_token;
 }
 
+std::string cdb::Configurator::discord_bot_id(void)
+{
+    return this->_discord_bot_id;
+}
+
 cdb::log_lvl cdb::Configurator::get_log_level(void)
 {
     return this->log_level;
@@ -140,6 +146,11 @@ cdb::log_lvl cdb::Configurator::get_log_level(void)
 void cdb::Configurator::set_discord_token(std::string token)
 {
     this->_discord_token = token;
+}
+
+void cdb::Configurator::set_discord_bot_id(std::string bot_id)
+{
+    this->_discord_bot_id = bot_id;
 }
 
 void cdb::Configurator::set_logger(cdb::Logger * logger)

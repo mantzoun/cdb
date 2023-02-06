@@ -13,7 +13,8 @@
 
 #include "cdb_discord_bot.h"
 
-static dpp::cluster * bot;
+static dpp::cluster     * bot;
+static cdb::DiscordBot  * cdb_discord_bot;
 
 static std::map<std::string, dpp::snowflake> channel_map;
 static std::map<std::string, dpp::snowflake> device_map;
@@ -96,10 +97,15 @@ dpp::command_completion_event_t  channels_cb(dpp::confirmation_callback_t value)
         }
     }
 
+    dpp::message m;
+    m.channel_id = channel_map["syslog"];
+    m.content    = "Bot conneced, bot id " + cdb_discord_bot->bot_id();
+    bot->message_create(m, &my_message_cb);
+
     return NULL;
 }
 
-dpp::command_completion_event_t  callback(dpp::confirmation_callback_t value)
+dpp::command_completion_event_t  guild_callback(dpp::confirmation_callback_t value)
 {
     bot->log(dpp::ll_debug, "Callback");
     if ( value.is_error() == true ){
@@ -200,9 +206,12 @@ void cdb::DiscordBot::message_cb(cdb::callback_msg * msg)
     }
 }
 
-void cdb::DiscordBot::init(std::string token)
+void cdb::DiscordBot::init(std::string token, std::string bot_id)
 {
     bot = new dpp::cluster(token);
+    cdb_discord_bot = this;
+
+    this->_bot_id = bot_id;
 
     // Use our own logger for output consistency
     bot->on_log([this](const dpp::log_t & event) {
@@ -223,7 +232,7 @@ void cdb::DiscordBot::init(std::string token)
             this->logger->error("Discord Bot: " + event.message);
             break;
         }
-  });
+    });
 
 
     bot->on_button_click([this](const dpp::button_click_t & event) {
@@ -270,14 +279,12 @@ void cdb::DiscordBot::init(std::string token)
     });
 
     bot->on_ready([](const dpp::ready_t& event) {
-        if (dpp::run_once<struct register_bot_commands>()) {
-            bot->global_command_create(
-                dpp::slashcommand("ping", "Ping pong!", bot->me.id)
-            );
-        }
+        //if (dpp::run_once<struct register_bot_commands>()) {
+        //    bot->global_command_create(
+        //        dpp::slashcommand("ping", "Ping pong!", bot->me.id)
+        //    );
 
-        bot->log(dpp::ll_debug, "API call");
-        bot->current_user_get_guilds(&callback);
+        bot->current_user_get_guilds(&guild_callback);
     });
 
     bot->start(dpp::st_return);
@@ -288,14 +295,12 @@ void cdb::DiscordBot::set_mqtt_handler(cdb::CallbackClass * m_handler)
     this->m_handler = m_handler;
 }
 
-/*
- * set_logger
- *
- * Set the logger object used for logging
- */
 void cdb::DiscordBot::set_logger(cdb::Logger * l)
 {
     this->logger = l;
 }
 
-
+std::string cdb::DiscordBot::bot_id(void)
+{
+    return this->_bot_id;
+}

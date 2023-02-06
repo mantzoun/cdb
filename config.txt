@@ -6,9 +6,12 @@ mqtt server     127.0.0.1   1883    user    abc123  client1
 # <mqtt> <name> <cmnd topic> <stat topic>
 mqtt    device_name    cmnd/device/POWER   stat/device/POWER
 
-# Discord token
-# <discord_token>  <TOKEN>
-discord_token acb123
+# Discord config
+# <discord> <bot_id> <discord_token>
+discord_token bot_1 acb123
 
 #Application log level
 log-level   DEBUG
+
+#Machine url, if available, used to get pubilc IP
+my_url      www.my.url

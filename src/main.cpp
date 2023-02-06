@@ -46,7 +46,7 @@ int main(int argc, char** argv)
 
     logger.info("Starting Discord Bot\n");
     bot.set_logger(&logger);
-    bot.init(conf.discord_token());
+    bot.init(conf.discord_token(), conf.discord_bot_id());
     bot.set_mqtt_handler(&m_handler);
 
     m_handler.set_discord_bot(&bot);
