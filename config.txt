@@ -9,3 +9,6 @@ mqtt    device_name    cmnd/device/POWER   stat/device/POWER
 # Discord token
 # <discord_token>  <TOKEN>
 discord_token acb123
+
+#Application log level
+log-level   DEBUG

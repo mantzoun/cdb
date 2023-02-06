@@ -28,11 +28,31 @@ int cdb::Configurator::conf_line_parser(std::string parameter_array[], std::stri
     return CDB_OK;
 }
 
+void cdb::Configurator::parse_log_level(std::string line)
+{
+    std::string items[2];
+
+    if (CDB_OK == this->conf_line_parser(items, line, 2)) {
+        if (items[1] == "DEBUG") {
+            this->log_level = CDB_LOG_DEBUG;
+        } else if (items[1] == "INFO") {
+            this->log_level = CDB_LOG_INFO;
+        } else if (items[1] == "WARN") {
+            this->log_level = CDB_LOG_WARN;
+        } else if (items[1] == "ERROR") {
+            this->log_level = CDB_LOG_ERROR;
+        } else {
+            return;
+        }
+        this->logger->debug("Parsed log level as " + items[1]);
+    }
+}
+
 void cdb::Configurator::parse_mqtt_server(std::string line)
 {
     std::string items[CDB_CONF_MQTT_SERVER_PARAMS];
 
-    if (CDB_OK == this->conf_line_parser(items, line, sizeof(items)/sizeof(items[0]))) {
+    if (CDB_OK == this->conf_line_parser(items, line, CDB_CONF_MQTT_SERVER_PARAMS)) {
         cdb::MqttServer * s = new cdb::MqttServer(items[CDB_CONF_MQTT_SERVER_ADDR],
                                             std::stoi(items[CDB_CONF_MQTT_SERVER_PORT]),
                                             items[CDB_CONF_MQTT_SERVER_USERNAME],
@@ -47,7 +67,7 @@ void cdb::Configurator::parse_mqtt_device(std::string line)
 {
     std::string items[CDB_CONF_MQTT_DEVICE_PARAMS];
 
-    if (CDB_OK == this->conf_line_parser(items, line, sizeof(items)/sizeof(items[0]))) {
+    if (CDB_OK == this->conf_line_parser(items, line, CDB_CONF_MQTT_DEVICE_PARAMS)) {
         cdb::MqttDevice * d = new cdb::MqttDevice(items[CDB_CONF_MQTT_DEVICE_NAME],
                                             items[CDB_CONF_MQTT_DEVICE_CMND],
                                             items[CDB_CONF_MQTT_DEVICE_STAT]);
@@ -60,7 +80,7 @@ void cdb::Configurator::parse_discord_token(std::string line)
 {
     std::string items[CDB_CONF_DISCORD_PARAMS];
 
-    if (CDB_OK == this->conf_line_parser(items, line, sizeof(items)/sizeof(items[0]))) {
+    if (CDB_OK == this->conf_line_parser(items, line, CDB_CONF_DISCORD_PARAMS)) {
         this->set_discord_token(items[CDB_CONF_DISCORD_TOKEN]);
         this->logger->debug("Parsed discord token configuration");
     }
@@ -85,6 +105,8 @@ void cdb::Configurator::parse_line(std::string line)
         this->parse_mqtt_server(line);
     } else if (type == "discord_token") {
         this->parse_discord_token(line);
+    } else if (type == "log-level") {
+        this->parse_log_level(line);
     } else {
         this->logger->warn("invalid config: " + line);
     }
@@ -108,6 +130,11 @@ cdb::Configurator::Configurator(void)
 std::string cdb::Configurator::discord_token(void)
 {
     return this->_discord_token;
+}
+
+cdb::log_lvl cdb::Configurator::get_log_level(void)
+{
+    return this->log_level;
 }
 
 void cdb::Configurator::set_discord_token(std::string token)
