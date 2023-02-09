@@ -22,7 +22,7 @@ namespace cdb {
             cdb::Logger * logger;
             std::string _discord_token;
             std::string _discord_bot_id;
-            std::string  my_url = NULL;
+            std::string  my_url = "";
             cdb::log_lvl log_level = CDB_LOG_DEBUG;
 
             int  conf_line_parser(std::string * parameter_array, std::string line, int num_of_arguments);
