@@ -8,7 +8,7 @@
 #ifndef CDB_LOGGER__H
 #define CDB_LOGGER__H
 
-#include<string>
+#include <string>
 
 namespace cdb {
     /**

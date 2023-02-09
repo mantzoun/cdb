@@ -25,6 +25,7 @@ namespace cdb {
         private:
             cdb::Logger * logger = NULL;
             cdb::CallbackClass * m_handler = NULL;
+            std::string _bot_id;
 
         public:
             DiscordBot(void);
@@ -34,7 +35,7 @@ namespace cdb {
              *
              * @param token Thi discord authentication token
              */
-            void init(std::string token);
+            void init(std::string token, std::string bot_id);
 
             /**
              * @brief set the logger object
@@ -56,6 +57,13 @@ namespace cdb {
              * @param msg The message information
              */
             void message_cb(cdb::callback_msg *msg);
+
+            /**
+             * @brief Getter function for the bot id
+             *
+             * @return The bot id
+             */
+            std::string bot_id(void);
     };
 }
 

@@ -10,8 +10,9 @@
 
 /* CONFIGURATION */
 #define CDB_CONF_DISCORD_TYPE               0
-#define CDB_CONF_DISCORD_TOKEN              1
-#define CDB_CONF_DISCORD_PARAMS             2
+#define CDB_CONF_DISCORD_BOT_ID             1
+#define CDB_CONF_DISCORD_TOKEN              2
+#define CDB_CONF_DISCORD_PARAMS             3
 
 #define CDB_CONF_MQTT_DEVICE_TYPE           0
 #define CDB_CONF_MQTT_DEVICE_NAME           1
