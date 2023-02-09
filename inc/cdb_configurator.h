@@ -22,10 +22,12 @@ namespace cdb {
             cdb::Logger * logger;
             std::string _discord_token;
             std::string _discord_bot_id;
+            std::string  my_url = NULL;
             cdb::log_lvl log_level = CDB_LOG_DEBUG;
 
             int  conf_line_parser(std::string * parameter_array, std::string line, int num_of_arguments);
             void parse_log_level(std::string line);
+            void parse_my_url(std::string line);
             void parse_discord_config(std::string line);
             void parse_mqtt_device(std::string line);
             void parse_mqtt_server(std::string line);
@@ -94,6 +96,14 @@ namespace cdb {
              *
              */
             cdb::log_lvl get_log_level(void);
+
+            /**
+             * @brief Getter function for the url of the host running the bot
+             *
+             * @return The host url
+             *
+             */
+            std::string get_my_url(void);
     };
 }
 

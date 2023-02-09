@@ -28,6 +28,15 @@ int cdb::Configurator::conf_line_parser(std::string parameter_array[], std::stri
     return CDB_OK;
 }
 
+void cdb::Configurator::parse_my_url(std::string line)
+{
+    std::string items[2];
+
+    if (CDB_OK == this->conf_line_parser(items, line, 2)) {
+        this->my_url = items[1];
+    }
+}
+
 void cdb::Configurator::parse_log_level(std::string line)
 {
     std::string items[2];
@@ -108,6 +117,8 @@ void cdb::Configurator::parse_line(std::string line)
         this->parse_discord_config(line);
     } else if (type == "log-level") {
         this->parse_log_level(line);
+    } else if (type == "my_url") {
+        this->parse_my_url(line);
     } else {
         this->logger->warn("invalid config: " + line);
     }
@@ -141,6 +152,11 @@ std::string cdb::Configurator::discord_bot_id(void)
 cdb::log_lvl cdb::Configurator::get_log_level(void)
 {
     return this->log_level;
+}
+
+std::string cdb::Configurator::get_my_url(void)
+{
+    return this->my_url;
 }
 
 void cdb::Configurator::set_discord_token(std::string token)
