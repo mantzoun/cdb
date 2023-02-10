@@ -9,6 +9,7 @@
 #ifndef CDB_DISCORD_BOT__H
 #define CDB_DISCORD_BOT__H
 
+#include "dpp/dpp.h"
 #include "cdb_logger.h"
 #include "cdb_mqtt_handler.h"
 
@@ -29,7 +30,7 @@ namespace cdb {
      *        discord, and offer a callback function for message
      *        posting
      */
-    class DiscordBot : public cdb::CallbackClass
+    class DiscordBot : public cdb::CallbackClass, public dpp::cluster
     {
         private:
             cdb::Logger * logger = NULL;
@@ -38,13 +39,36 @@ namespace cdb {
             std::map<std::string, dpp::snowflake> channel_map;
             std::map<std::string, dpp::snowflake> device_map;
 
+            /**
+             * @brief Post a messsage to a channel
+             *
+             * @param content A srting containing the message
+             * @param channel The channel to post to
+             * @param callback The callback with the action result
+             */
+            void post_message(std::string content, std::string channel,
+                 dpp::command_completion_event_t callback(dpp::confirmation_callback_t result));
+
+            /**
+             * @brief Register discord slash commands
+             */
+            void register_commands(void);
+
+            /**
+             * @brief Handler for received slash command
+             *
+             * @param event Command information
+             */
+            void handle_slashcommand(const dpp::slashcommand_t & event);
+
         public:
-            DiscordBot(void);
+            using dpp::cluster::cluster;
 
             /**
              * @brief Initiaze the bot
              *
-             * @param token Thi discord authentication token
+             * @param token The discord authentication token
+             * @param bot_id The ID of the bot instance
              */
             void init(std::string token, std::string bot_id);
 
@@ -75,16 +99,6 @@ namespace cdb {
              * @return The bot id
              */
             std::string bot_id(void);
-
-            /**
-             * @brief Post a messsage to a channel
-             *
-             * @param content A srting containing the message
-             * @param channel The channel to post to
-             * @param callback The callback with the action result
-             */
-            void post_message(std::string content, std::string channel,
-                 dpp::command_completion_event_t callback(dpp::confirmation_callback_t result));
 
             /**
              * @brief Callback function for the guild map request

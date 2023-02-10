@@ -16,7 +16,6 @@
 #include "cdb_mqtt_handler.h"
 
 
-static cdb::DiscordBot bot;
 
 int main(int argc, char** argv)
 {
@@ -45,6 +44,7 @@ int main(int argc, char** argv)
     io.fifo_init("/tmp/mqtt_disc_cpp.fifo");
 
     logger.info("Starting Discord Bot\n");
+    cdb::DiscordBot bot(conf.discord_token());
     bot.set_logger(&logger);
     bot.init(conf.discord_token(), conf.discord_bot_id());
     bot.set_mqtt_handler(&m_handler);
