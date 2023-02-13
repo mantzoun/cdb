@@ -14,6 +14,20 @@
 #include "cdb_mqtt_handler.h"
 
 namespace cdb {
+    /*
+     * Map of channels
+     * key      Channel name
+     * value    Channel info
+     */
+    typedef std::map<std::string, dpp::snowflake> channel_map_t;
+
+    /*
+     * Map of messages
+     * key      Message content
+     * value    Message info
+     */
+    typedef std::map<std::string, dpp::snowflake> message_map_t;
+
     /**
      * @brief Error codes used in this module
      */
@@ -36,8 +50,19 @@ namespace cdb {
             cdb::Logger * logger = NULL;
             cdb::CallbackClass * m_handler = NULL;
             std::string _bot_id;
-            std::map<std::string, dpp::snowflake> channel_map;
-            std::map<std::string, dpp::snowflake> device_map;
+            /*
+             * Map of channels of interest
+             * key      Guild snowflake
+             * value    Channels map
+             */
+            std::map<dpp::snowflake, channel_map_t> channel_map;
+
+            /*
+             * Map of messages of interest
+             * key      Guild snowflake
+             * value    Message snowflake
+             */
+            std::map<dpp::snowflake, message_map_t> message_map;
 
             /**
              * @brief Post a messsage to a channel
@@ -46,7 +71,7 @@ namespace cdb {
              * @param channel The channel to post to
              * @param callback The callback with the action result
              */
-            void post_message(std::string content, std::string channel,
+            void post_message(std::string content, dpp::snowflake guild_id, std::string channel,
                  dpp::command_completion_event_t callback(dpp::confirmation_callback_t result));
 
             /**

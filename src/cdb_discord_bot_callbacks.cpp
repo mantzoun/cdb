@@ -7,9 +7,6 @@
 #include "dpp/restresults.h"
 #include "dpp/guild.h"
 
-#include <stdio.h>
-#include <map>
-
 #include "cdb_discord_bot.h"
 
 dpp::command_completion_event_t generic_callback(dpp::confirmation_callback_t result)
@@ -21,6 +18,7 @@ dpp::command_completion_event_t generic_callback(dpp::confirmation_callback_t re
     if ( result.is_error() == true ){
         dpp::error_info err = result.get_error();
         my_bot->log(dpp::ll_error, "Error " + err.message);
+        return NULL;
     }
 
     if (std::holds_alternative<dpp::guild_map>(result.value)) {
@@ -44,11 +42,15 @@ void cdb::DiscordBot::message_map_cb(dpp::message_map message_map)
 {
     log(dpp::ll_debug, "devices init Callback");
 
+    dpp::snowflake g_id = message_map.begin()->second.guild_id;
+    cdb::channel_map_t chan_map = this->channel_map[g_id];
+    cdb::message_map_t temp_map;
+
     for (auto& it: message_map) {
         std::string device_name;
         dpp::message m = it.second;
 
-        if (m.channel_id == channel_map["devices"]){
+        if (m.channel_id == chan_map["devices"]){
             size_t fs = m.content.find(" ");
 
             if (fs == std::string::npos){
@@ -58,41 +60,55 @@ void cdb::DiscordBot::message_map_cb(dpp::message_map message_map)
             }
 
             log(dpp::ll_debug, "found message for " + device_name);
-            device_map[device_name] = m.id;
+            temp_map[device_name] = m.id;
         }
     }
+
+    this->message_map[g_id] = temp_map;
 }
 
 void cdb::DiscordBot::dpp_message_cb(dpp::message message)
 {
-    log(dpp::ll_debug, "message Callback");
+    dpp::snowflake g_id = message.guild_id;
 
-    if (message.channel_id == channel_map["devices"]) {
+    channel_map_t c_map = this->channel_map[g_id];
+    message_map_t m_map = this->message_map[g_id];
+
+    log(dpp::ll_debug, "message Callback, gid " + std::to_string(g_id));
+
+    if (message.channel_id == c_map["devices"]) {
         log(dpp::ll_debug, "Got respose for " + message.content);
-        device_map[message.content] = message.id;
+        m_map[message.content] = message.id;
     }
 }
 
-void cdb::DiscordBot::channel_map_cb(dpp::channel_map channel_map)
+void cdb::DiscordBot::channel_map_cb(dpp::channel_map channels_map)
 {
-    log(dpp::ll_debug, "channel Callback");
-
     dpp::snowflake id;
     dpp::channel c;
 
-    for (auto& it: channel_map) {
+    cdb::channel_map_t temp_map;
+
+    log(dpp::ll_debug, "channel Callback");
+
+    for (auto& it: channels_map) {
         id = it.first;
         c = it.second;
 
         log(dpp::ll_debug, c.name);
-        this->channel_map[c.name] = id;
+        temp_map[c.name] = id;
 
         if (c.name == "devices") {
             messages_get(id, 0, 0, 0, 0, &generic_callback);
         }
     }
 
-    post_message("Bot conneced, bot id " + this->bot_id(), "syslog", &generic_callback);
+    dpp::snowflake g_id = channels_map.begin()->second.guild_id;
+    log(dpp::ll_debug, "channel Callback, gid " + std::to_string(g_id));
+
+    this->channel_map[g_id] = temp_map;
+
+    post_message("Bot conneced, bot id " + this->bot_id(), g_id, "syslog", &generic_callback);
 }
 
 void cdb::DiscordBot::guild_map_cb(dpp::guild_map guild_map)

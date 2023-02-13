@@ -33,6 +33,22 @@
 #define CDB_IO_FIELD_CONTENT                2
 #define CDB_IO_FIELD_TOTAL                  3
 
+#define LOG(__logger, __log_level, __message) \
+    { \
+        std::string __msg =  __message + \
+                            std::string(" (") + \
+                            std::string(__FILE__) + \
+                            std::string(":") + \
+                            std::to_string(__LINE__) + \
+                            std::string(")"); \
+        (__logger)->log(__log_level, __msg); \
+    }
+
+#define LOG_DEBUG(__logger, __message)   LOG(__logger, cdb::CDB_LOG_DEBUG, __message)
+#define LOG_INFO(__logger, __message)    LOG(__logger, cdb::CDB_LOG_INFO, __message)
+#define LOG_WARN(__logger, __message)    LOG(__logger, cdb::CDB_LOG_WARN, __message)
+#define LOG_ERROR(__logger, __message)   LOG(__logger, cdb::CDB_LOG_ERROR, __message)
+
 namespace cdb {
     /**
       * @brief Enum of all cdb message types

@@ -21,7 +21,7 @@ int cdb::Configurator::conf_line_parser(std::string parameter_array[], std::stri
     }
 
     if (i!= num_of_arguments) {
-        this->logger->warn("invalid config: " + line);
+        LOG_WARN(this->logger,"invalid config: " + line);
         return CDB_NOK;
     }
 
@@ -53,7 +53,7 @@ void cdb::Configurator::parse_log_level(std::string line)
         } else {
             return;
         }
-        this->logger->debug("Parsed log level as " + items[1]);
+        LOG_DEBUG(this->logger,"Parsed log level as " + items[1]);
     }
 }
 
@@ -67,7 +67,7 @@ void cdb::Configurator::parse_mqtt_server(std::string line)
                                             items[CDB_CONF_MQTT_SERVER_USERNAME],
                                             items[CDB_CONF_MQTT_SERVER_PASSWORD],
                                             items[CDB_CONF_MQTT_SERVER_CLIENT_ID]);
-        this->logger->debug("Parsed MQTT server configuration for " + s->addr() + ":" + std::to_string(s->port()));
+        LOG_DEBUG(this->logger,"Parsed MQTT server configuration for " + s->addr() + ":" + std::to_string(s->port()));
         this->inventory.mqtt_server_add(s);
     }
 }
@@ -80,7 +80,7 @@ void cdb::Configurator::parse_mqtt_device(std::string line)
         cdb::MqttDevice * d = new cdb::MqttDevice(items[CDB_CONF_MQTT_DEVICE_NAME],
                                             items[CDB_CONF_MQTT_DEVICE_CMND],
                                             items[CDB_CONF_MQTT_DEVICE_STAT]);
-        this->logger->debug("Parsed MQTT device configuration for " + d->name());
+        LOG_DEBUG(this->logger,"Parsed MQTT device configuration for " + d->name());
         this->inventory.mqtt_device_add(d);
     }
 }
@@ -92,7 +92,7 @@ void cdb::Configurator::parse_discord_config(std::string line)
     if (CDB_OK == this->conf_line_parser(items, line, CDB_CONF_DISCORD_PARAMS)) {
         this->set_discord_token(items[CDB_CONF_DISCORD_TOKEN]);
         this->set_discord_bot_id(items[CDB_CONF_DISCORD_BOT_ID]);
-        this->logger->debug("Parsed discord token configuration");
+        LOG_DEBUG(this->logger,"Parsed discord token configuration");
     }
 }
 
@@ -120,7 +120,7 @@ void cdb::Configurator::parse_line(std::string line)
     } else if (type == "my_url") {
         this->parse_my_url(line);
     } else {
-        this->logger->warn("invalid config: " + line);
+        LOG_WARN(this->logger,"invalid config: " + line);
     }
 }
 

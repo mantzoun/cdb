@@ -38,11 +38,11 @@ void cdb::MqttHandler::on_connect_cb(void)
 {
     cdb::Configurator *conf = this->conf;
     std::list<cdb::MqttDevice *> * l = conf->inventory.mqtt_dev_list();
-    logger->info("MQTT Handler: On Connect");
+    LOG_INFO(logger, "MQTT Handler: On Connect");
 
     std::list<cdb::MqttDevice *>::iterator it;
     for (it = l->begin(); it != l->end(); ++it){
-        logger->info("MQTT Handler: Adding device " + (*it)->name());
+        LOG_INFO(logger, "MQTT Handler: Adding device " + (*it)->name());
         this->add_device(*it);
         cdb::callback_msg msg = { CDB_MSG_DISC_MQTT_DEV_ADD,
                                  (*it)->name()};
@@ -54,14 +54,14 @@ void cdb::MqttHandler::on_connect_cb(void)
 
 void cdb::MqttHandler::on_disconnect_cb(void)
 {
-    logger->warn("MQTT Handler: On Disconnect");
+    LOG_WARN(logger, "MQTT Handler: On Disconnect");
 }
 
 void cdb::MqttHandler::on_message_cb(const mosquitto_message *message)
 {
     cdb::msg_t type = cdb::CDB_MSG_MAX;
     std::string msg = (char*) message->payload;
-    logger->info("MQTT Handler: Received message " + msg + " for device " + stat_topic_map[message->topic]);
+    LOG_INFO(logger, "MQTT Handler: Received message " + msg + " for device " + stat_topic_map[message->topic]);
 
     if (stat_topic_map.find(message->topic) != stat_topic_map.end()){
         if (strcmp((char*) message->payload, "ON") == 0){
@@ -69,7 +69,7 @@ void cdb::MqttHandler::on_message_cb(const mosquitto_message *message)
         } else if (strcmp((char*) message->payload, "OFF") == 0){
             type = cdb::CDB_MSG_DISC_MQTT_DEV_STATUS_OFF;
         } else {
-            logger->warn("MQTT Handler: Could not determine message type");
+            LOG_WARN(logger, "MQTT Handler: Could not determine message type");
             return;
         }
 
@@ -95,7 +95,7 @@ void cdb::MqttHandler::message_cb(cdb::callback_msg * msg)
     const char * cmd_off  = "0";
     const char * cmd_poll = "";
 
-    this->logger->info("MQTT Handler: Received bot msg: " + msg->content);
+    LOG_INFO(logger, "MQTT Handler: Received bot msg: " + msg->content);
 
     switch(msg->type){
         case CDB_MSG_MQTT_HANDLER_TURN_DEVICE_ON:
@@ -108,7 +108,7 @@ void cdb::MqttHandler::message_cb(cdb::callback_msg * msg)
             this->publish(cmnd_topic_map[msg->content].c_str(), sizeof(cmd_poll), cmd_poll);
             break;
         default:
-            this->logger->warn("MQTT Handler: Unexpected message type: " + std::to_string(msg->type));
+            LOG_WARN(logger, "MQTT Handler: Unexpected message type: " + std::to_string(msg->type));
     }
 }
 
@@ -119,18 +119,18 @@ void cdb::MqttHandler::mosq_logger(mosquitto *mosq, void *obj, int level, const 
 
     switch(level){
         case MOSQ_LOG_DEBUG:
-            logger->debug(msg);
+            LOG_DEBUG(logger, msg);
             break;
         case MOSQ_LOG_INFO:
         case MOSQ_LOG_NOTICE:
-            logger->info(msg);
+            LOG_INFO(logger, msg);
             break;
         case MOSQ_LOG_WARNING:
-            logger->warn(msg);
+            LOG_WARN(logger, msg);
             break;
         case MOSQ_LOG_ERR:
         default:
-            logger->error(msg);
+            LOG_ERROR(logger, msg);
             break;
     }
 }
@@ -142,12 +142,12 @@ void cdb::MqttHandler::init(cdb::Configurator * conf)
     std::list<cdb::MqttDevice *> * l = conf->inventory.mqtt_dev_list();
 
     if (broker == NULL) {
-        logger->info("MQTT Handler: No MQTT broker configured, skipping MQTT setup");
+        LOG_INFO(logger, "MQTT Handler: No MQTT broker configured, skipping MQTT setup");
         return;
     }
 
     if (l == NULL) {
-        logger->info("MQTT Handler: No MQTT devices configured, skipping MQTT setup");
+        LOG_INFO(logger, "MQTT Handler: No MQTT devices configured, skipping MQTT setup");
         return;
     }
 
@@ -172,11 +172,11 @@ int cdb::MqttHandler::connect(cdb::MqttServer * conf)
 {
     int res = mosquitto_connect(this->mosq, conf->addr().c_str(), conf->port(), 30);
     if (MOSQ_ERR_SUCCESS != res){
-        logger->error("MQTT Handler: Connection to MQTT broker failed, error " + std::to_string(res));
+        LOG_ERROR(logger, "MQTT Handler: Connection to MQTT broker failed, error " + std::to_string(res));
         return CDB_NOK;
     }
 
-    logger->info("MQTT Handler: Connected to MQTT broker.");
+    LOG_INFO(logger, "MQTT Handler: Connected to MQTT broker.");
     return CDB_OK;
 }
 
@@ -188,6 +188,6 @@ void cdb::MqttHandler::add_device(cdb::MqttDevice * device)
 void cdb::MqttHandler::publish(const char * topic, int payload_len, const void * payload)
 {
     std::string msg = (char*) payload;
-    logger->info("MQTT Handler: Publish message " + msg);
+    LOG_INFO(logger, "MQTT Handler: Publish message " + msg);
     mosquitto_publish(this->mosq, NULL, topic, payload_len, payload, 2, false);
 }

@@ -39,11 +39,11 @@ int main(int argc, char** argv)
     m_handler.set_logger(&logger);
     io.set_logger(&logger);
 
-    logger.info("Reading config file");
+    LOG_INFO(&logger, "Reading config file");
 
     io.fifo_init("/tmp/mqtt_disc_cpp.fifo");
 
-    logger.info("Starting Discord Bot\n");
+    LOG_INFO(&logger, "Starting Discord Bot");
     cdb::DiscordBot bot(conf.discord_token());
     bot.set_logger(&logger);
     bot.init(conf.discord_token(), conf.discord_bot_id());
@@ -54,7 +54,7 @@ int main(int argc, char** argv)
 
     io.set_discord_bot(&bot);
 
-    logger.info("Init done, entering loop");
+    LOG_INFO(&logger, "Init done, entering loop");
 
     while(1){
         usleep(1000000);

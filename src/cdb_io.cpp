@@ -15,14 +15,14 @@ cdb::IO::IO(void)
 
 void cdb::IO::fifo_read(void)
 {
-     this->logger->debug("CDB_IO: starting fifo");
+     LOG_DEBUG(this->logger,"CDB_IO: starting fifo");
 
     std::ifstream fifo{this->fifo_path};
     std::string line;
 
     while (!this->fifo_stop && !fifo.fail()){
         while (std::getline(fifo, line)){
-        this->logger->debug("CDB_IO: fifo input: " + line);
+        LOG_DEBUG(this->logger,"CDB_IO: fifo input: " + line);
             int i = 0;
             cdb::callback_msg msg;
 
@@ -65,13 +65,13 @@ void cdb::IO::fifo_read(void)
         usleep(500000);
     }
 
-    this->logger->warn("CDB_IO: exiting fifo io loop");
+    LOG_WARN(this->logger,"CDB_IO: exiting fifo io loop");
 }
 
 bool cdb::IO::fifo_init(std::string path)
 {
     if (fifo_t != NULL){
-        this->logger->warn("CDB_IO: IO thread already running");
+        LOG_WARN(this->logger,"CDB_IO: IO thread already running");
         return false;
     }
 
@@ -89,7 +89,7 @@ bool cdb::IO::fifo_init(std::string path)
 bool cdb::IO::fifo_terminate()
 {
     if (this->fifo_t == NULL){
-         this->logger->warn("CDB_IO: IO thread not running");
+         LOG_WARN(this->logger,"CDB_IO: IO thread not running");
         return false;
     }
 
