@@ -7,8 +7,11 @@
 #include <iostream>
 #include <ctime>
 #include <cstdio>
+#include <mutex>
 
 #include "cdb_logger.h"
+
+static std::mutex log_mutex;
 
 std::string cdb_log_lvl_str[cdb::CDB_LOG_ERROR + 1] =
                              {
@@ -31,6 +34,8 @@ void cdb::Logger::set_level(cdb::log_lvl lvl)
 void cdb::Logger::log(cdb::log_lvl lvl, std::string s)
 {
     if (lvl >= this->level){
+        std::lock_guard<std::mutex> guard(log_mutex);
+
         time_t now = time(0);
         tm *ltm = localtime(&now);
         char res[30];
