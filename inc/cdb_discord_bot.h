@@ -10,8 +10,8 @@
 #define CDB_DISCORD_BOT__H
 
 #include "dpp/dpp.h"
+#include "cdb_callback_class.h"
 #include "cdb_logger.h"
-#include "cdb_mqtt_handler.h"
 
 namespace cdb {
     /*
@@ -48,7 +48,7 @@ namespace cdb {
     {
         private:
             cdb::Logger * logger = NULL;
-            cdb::CallbackClass * m_handler = NULL;
+            cdb::CallbackClass * message_handler = NULL;
             std::string _bot_id;
             /*
              * Map of channels of interest
@@ -105,18 +105,19 @@ namespace cdb {
             void set_logger(cdb::Logger * logger);
 
             /**
-             * @brief set the MQTT handler
+             * @brief Set a pointer to the module that will handle
+             *        messages coming from this object
              *
-             * @param m_handler the MQTT handler object
+             * @param message_handler The message handling object
              */
-            void set_mqtt_handler(cdb::CallbackClass * m_handler);
+            void set_message_handler(cdb::CallbackClass * handler);
 
             /**
              * @brief Post a message to discord
              *
              * @param msg The message information
              */
-            void message_cb(cdb::callback_msg *msg);
+            void message_cb(cdb::intra_msg_t *msg);
 
             /**
              * @brief Getter function for the bot id

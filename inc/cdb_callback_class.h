@@ -4,20 +4,9 @@
 #include <string>
 
 #include "cdb_definitions.h"
+#include "cdb_intra_messaging.h"
 
 namespace cdb {
-    /**
-     * @class callback_msg
-     *
-     * @brief the message to be sent to the class interface
-     */
-    struct callback_msg
-    {
-        cdb::msg_t  type;       /*!< Messge type */
-        std::string content;    /*!< Messge content */
-        std::string channel;    /*!< Channel to post the message to */
-    };
-
     /**
      * @class CallbackClass
      *
@@ -33,7 +22,7 @@ namespace cdb {
              *
              * @param msg the message information
              */
-            virtual void message_cb(cdb::callback_msg * msg) = 0;
+            virtual void message_cb(cdb::intra_msg_t * msg) = 0;
     };
 }
 #endif /* CDB_CALLBACK_CLASS__H */

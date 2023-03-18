@@ -15,7 +15,7 @@ cdb::IO::IO(void)
 
 void cdb::IO::fifo_read(void)
 {
-     LOG_DEBUG(this->logger,"CDB_IO: starting fifo");
+    LOG_DEBUG(this->logger,"CDB_IO: starting fifo");
 
     std::ifstream fifo{this->fifo_path};
     std::string line;
@@ -24,9 +24,13 @@ void cdb::IO::fifo_read(void)
         while (std::getline(fifo, line)){
         LOG_DEBUG(this->logger,"CDB_IO: fifo input: " + line);
             int i = 0;
-            cdb::callback_msg msg;
+            cdb::intra_msg_t msg;
 
-            for (i = 0; i < CDB_IO_FIELD_TOTAL; i++){
+            msg.sender = CDB_IO_HANDLER;
+            io_msg_t io_msg;
+            msg.content.io = &io_msg;
+
+            for (i = 0; i < CDB_IO_FIFO_FIELD_TOTAL; i++){
                 size_t delim = line.find("#");
 
                 if (delim == std::string::npos){
@@ -37,26 +41,25 @@ void cdb::IO::fifo_read(void)
                 line.erase(0, delim + 1);
 
                 switch(i) {
-                    case CDB_IO_FIELD_CHANNEL:
-                        msg.channel = str;
+                    case CDB_IO_FIFO_COMMAND:
+                        io_msg.command = str;
                         break;
-                    case CDB_IO_FIELD_CONTENT:
-                        msg.content = str;
+                    case CDB_IO_FIFO_FIELD1:
+                        io_msg.field1 = str;
                         break;
-                    case CDB_IO_FIELD_TYPE:
-                        if (str == "FILE"){
-                            msg.type = CDB_MSG_DISC_POST_FILE;
-                        } else if (str == "TEXT"){
-                            msg.type = CDB_MSG_DISC_POST_MESSAGE;
-                        }
+                    case CDB_IO_FIFO_FIELD2:
+                        io_msg.field2 = str;
+                        break;
+                    case CDB_IO_FIFO_FIELD3:
+                        io_msg.field3 = str;
                         break;
                     default:
                         break;
                 }
             }
 
-            if (i == CDB_IO_FIELD_TOTAL) {
-                this->bot->message_cb(&msg);
+            if (i == CDB_IO_FIFO_FIELD_TOTAL) {
+                this->message_handler->message_cb(&msg);
             }
         }
         if (fifo.eof()){
@@ -106,8 +109,8 @@ void cdb::IO::set_logger(cdb::Logger * l)
     this->logger = l;
 }
 
-void cdb::IO::set_discord_bot(cdb::CallbackClass * disc_bot)
+void cdb::IO::set_message_handler(cdb::CallbackClass * handler)
 {
-    this->bot = disc_bot;
+    this->message_handler = handler;
 }
 

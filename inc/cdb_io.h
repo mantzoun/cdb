@@ -24,7 +24,7 @@ namespace cdb {
         std::string fifo_path;
         void        * fifo_cb;
         cdb::Logger * logger = NULL;
-        cdb::CallbackClass * bot;
+        cdb::CallbackClass * message_handler;
 
        /**
         * fifo_read
@@ -67,14 +67,12 @@ namespace cdb {
         void set_logger(cdb::Logger * logger);
 
         /**
-         * @brief Set a pointer to the discord bot module
+         * @brief Set a pointer to the module that will handle
+         *        messages coming from this object
          *
-         *        The bot is able to receive messages from the
-         *        IO.
-         *
-         * @param bot The discord bot object
+         * @param message_handler The message handling object
          */
-        void set_discord_bot(cdb::CallbackClass * bot);
+        void set_message_handler(cdb::CallbackClass * handler);
     };
 }
 

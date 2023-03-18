@@ -24,6 +24,48 @@ class Main : public cdb::CallbackClass
         cdb::IO io;
         cdb::Configurator conf;
         cdb::MqttHandler m_handler;
+
+        void handle_bot_message(cdb::bot_msg_t * msg)
+        {
+            switch(msg->type){
+                case CDB_INTRA_DISC_BOT_COMMAND:
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void handle_mqtt_message(cdb::mqtt_msg_t * msg)
+        {
+        }
+
+        void handle_io_message(cdb::io_msg_t * msg)
+        {
+            if (msg->command == "POST_FILE_DISCORD") {
+            } else if (msg->command == "POST_TEXT_DISCORD") {
+            } else if (msg->command == "ADD_MQTT_CONFIG") {
+            } else {
+                LOG_WARN(logger, "Invalid IO message");
+            }
+        }
+
+        void message_cb(cdb::intra_msg_t * msg)
+        {
+            switch(msg->sender){
+                case cdb::CDB_IO_HANDLER:
+                    handle_io_message(msg->content.io);
+                    break;
+                case cdb::CDB_MQTT_HANDLER:
+                    handle_mqtt_message(msg->content.mqtt);
+                    break;
+                case cdb::CDB_DISCORD_BOT:
+                    handle_bot_message(msg->content.bot);
+                    break;
+                default:
+                    break;
+            }
+        }
+
     public:
         Main(int argc, char** argv) {
             if (argc < 2){
@@ -31,10 +73,6 @@ class Main : public cdb::CallbackClass
                 exit(1);
             }
             config_file = argv[1];
-        }
-
-        void message_cb(cdb::callback_msg * msg)
-        {
         }
 
         int run(void) {
@@ -52,15 +90,15 @@ class Main : public cdb::CallbackClass
             io.fifo_init("/tmp/mqtt_disc_cpp.fifo");
 
             LOG_INFO(logger, "Starting Discord Bot");
-            cdb::DiscordBot bot(conf.discord_token());
-            bot.set_logger(logger);
-            bot.init(conf.discord_token(), conf.discord_bot_id());
-            bot.set_mqtt_handler(&m_handler);
+//            cdb::DiscordBot bot(conf.discord_token());
+//            bot.set_logger(logger);
+//            bot.init(conf.discord_token(), conf.discord_bot_id());
+//            bot.set_message_handler(this);
 
-            m_handler.set_discord_bot(&bot);
+            m_handler.set_message_handler(this);
             m_handler.init(&conf);
 
-            io.set_discord_bot(&bot);
+            io.set_message_handler(this);
 
             LOG_INFO(logger, "Init done, entering loop");
 

@@ -10,4 +10,4 @@ else
     mkfifo /tmp/mqtt_disc_cpp.fifo
 fi
 
-./bin/cdb ./config.txt
+./bin/cdb ./config.txt.0

@@ -4,10 +4,9 @@
 #include "iostream"
 
 #include "cdb_mqtt_handler.h"
-#include "cdb_discord_bot.h"
 
 cdb::Logger * cdb::MqttHandler::logger;
-cdb::CallbackClass * my_bot;
+cdb::CallbackClass * my_message_handler;
 
 static std::map<std::string, std::string> stat_topic_map;
 static std::map<std::string, std::string> cmnd_topic_map;
@@ -44,11 +43,18 @@ void cdb::MqttHandler::on_connect_cb(void)
     for (it = l->begin(); it != l->end(); ++it){
         LOG_INFO(logger, "MQTT Handler: Adding device " + (*it)->name());
         this->add_device(*it);
-        cdb::callback_msg msg = { CDB_MSG_DISC_MQTT_DEV_ADD,
-                                 (*it)->name()};
+
         stat_topic_map[(*it)->stat()] = (*it)->name();
         cmnd_topic_map[(*it)->name()] = (*it)->cmnd();
-        this->bot->message_cb(&msg);
+
+        cdb::intra_msg_t msg;
+        cdb::mqtt_handler_msg_t mqtt = { CDB_INTRA_MQTT_TOPIC_SUB,
+                                         (*it)->name(),
+                                         ""
+                                       };
+        msg.sender       = CDB_MQTT_HANDLER;
+        msg.content.mqtt = &mqtt;
+        this->message_handler->message_cb(&msg);
     }
 }
 
@@ -59,22 +65,25 @@ void cdb::MqttHandler::on_disconnect_cb(void)
 
 void cdb::MqttHandler::on_message_cb(const mosquitto_message *message)
 {
-    cdb::msg_t type = cdb::CDB_MSG_MAX;
     std::string msg = (char*) message->payload;
     LOG_INFO(logger, "MQTT Handler: Received message " + msg + " for device " + stat_topic_map[message->topic]);
 
     if (stat_topic_map.find(message->topic) != stat_topic_map.end()){
-        if (strcmp((char*) message->payload, "ON") == 0){
-            type = cdb::CDB_MSG_DISC_MQTT_DEV_STATUS_ON;
-        } else if (strcmp((char*) message->payload, "OFF") == 0){
-            type = cdb::CDB_MSG_DISC_MQTT_DEV_STATUS_OFF;
-        } else {
+        if ( strcmp((char*) message->payload, "ON") != 0 &&
+             strcmp((char*) message->payload, "OFF") != 0 ) {
             LOG_WARN(logger, "MQTT Handler: Could not determine message type");
             return;
         }
 
-        cdb::callback_msg  msg = {type, stat_topic_map[message->topic]};
-        my_bot->message_cb(&msg);
+        cdb::intra_msg_t msg;
+        std::string update = (char*) message->payload;
+        cdb::mqtt_handler_msg_t mqtt = { CDB_INTRA_MQTT_TOPIC_UPDATE,
+                                         stat_topic_map[message->topic],
+                                         update
+                                       };
+        msg.sender       = CDB_MQTT_HANDLER;
+        msg.content.mqtt = &mqtt;
+        my_message_handler->message_cb(&msg);
     }
 }
 
@@ -83,32 +92,36 @@ void cdb::MqttHandler::set_logger(cdb::Logger * l)
     logger = l;
 }
 
-void cdb::MqttHandler::set_discord_bot(cdb::CallbackClass * disc_bot)
+void cdb::MqttHandler::set_message_handler(cdb::CallbackClass * handler)
 {
-    this->bot = disc_bot;
-    my_bot = disc_bot;
+    this->message_handler = handler;
+    my_message_handler = handler;
 }
 
-void cdb::MqttHandler::message_cb(cdb::callback_msg * msg)
+void cdb::MqttHandler::message_cb(cdb::intra_msg_t * msg)
 {
-    const char * cmd_on   = "1";
-    const char * cmd_off  = "0";
-    const char * cmd_poll = "";
+    const char * cmd_on     = "1";
+    const char * cmd_off    = "0";
+    const char * cmd_poll   = "";
 
-    LOG_INFO(logger, "MQTT Handler: Received bot msg: " + msg->content);
+    cdb::mqtt_handler_msg_t * mqtt = msg->content.mqtt;
 
-    switch(msg->type){
-        case CDB_MSG_MQTT_HANDLER_TURN_DEVICE_ON:
-            this->publish(cmnd_topic_map[msg->content].c_str(), sizeof(cmd_on), cmd_on);
-            break;
-        case CDB_MSG_MQTT_HANDLER_TURN_DEVICE_OFF:
-            this->publish(cmnd_topic_map[msg->content].c_str(), sizeof(cmd_off), cmd_off);
-            break;
-        case CDB_MSG_MQTT_HANDLER_POLL_DEVICE_STATUS:
-            this->publish(cmnd_topic_map[msg->content].c_str(), sizeof(cmd_poll), cmd_poll);
+    LOG_INFO(logger, "MQTT Handler: Received intra msg: " + mqtt->content + " for device " + mqtt->device);
+
+    switch(mqtt->type){
+        case CDB_INTRA_MQTT_TOPIC_PUBLISH:
+            if (mqtt->content == "ON") {
+                this->publish(cmnd_topic_map[mqtt->device].c_str(), sizeof(cmd_on), cmd_on);
+            } else if (mqtt->content == "OFF") {
+                this->publish(cmnd_topic_map[mqtt->device].c_str(), sizeof(cmd_on), cmd_off);
+            } else if (mqtt->content == "POLL") {
+                this->publish(cmnd_topic_map[mqtt->device].c_str(), sizeof(cmd_poll), cmd_poll);
+            } else {
+                LOG_WARN(logger, "MQTT Handler: Unexpected publish message: " + mqtt->content);
+            }
             break;
         default:
-            LOG_WARN(logger, "MQTT Handler: Unexpected message type: " + std::to_string(msg->type));
+            LOG_WARN(logger, "MQTT Handler: Unexpected message type: " + std::to_string(mqtt->type));
     }
 }
 

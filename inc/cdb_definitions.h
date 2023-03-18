@@ -28,10 +28,12 @@
 #define CDB_CONF_MQTT_SERVER_CLIENT_ID      5
 #define CDB_CONF_MQTT_SERVER_PARAMS         6
 
-#define CDB_IO_FIELD_TYPE                   0
-#define CDB_IO_FIELD_CHANNEL                1
-#define CDB_IO_FIELD_CONTENT                2
-#define CDB_IO_FIELD_TOTAL                  3
+/* FIFO INPUT */
+#define CDB_IO_FIFO_COMMAND                 0
+#define CDB_IO_FIFO_FIELD1                  1
+#define CDB_IO_FIFO_FIELD2                  2
+#define CDB_IO_FIFO_FIELD3                  3
+#define CDB_IO_FIFO_FIELD_TOTAL             4
 
 #define LOG(__logger, __log_level, __message) \
     { \
@@ -56,7 +58,20 @@ namespace cdb {
       *        used for messages sent to objects derived
       *        from the Callback_Class
       */
-    enum msg_t {
+    enum cdb_intra_msg_mqtt_t {
+        CDB_INTRA_MQTT_TOPIC_SUB,
+        CDB_INTRA_MQTT_TOPIC_UPDATE,
+        CDB_INTRA_MQTT_TOPIC_PUBLISH,
+    };
+
+    enum cdb_intra_msg_bot_t {
+        CDB_INTRA_DISC_BOT_COMMAND,
+        CDB_INTRA_DISC_BOT_POST_TEXT,
+        CDB_INTRA_DISC_BOT_POST_FILE,
+        CDB_INTRA_DISC_BOT_DEVICE_ADD,
+        CDB_INTRA_DISC_BOT_DEVICE_SET,
+    };
+/*    enum msg_t {
         // MESSAGES -> DISCORD BOT
         CDB_MSG_DISC_MQTT_DEV_ADD,
         CDB_MSG_DISC_MQTT_DEV_STATUS_ON,
@@ -71,7 +86,7 @@ namespace cdb {
         CDB_MSG_MQTT_HANDLER_POLL_DEVICE_STATUS,
 
         CDB_MSG_MAX
-    };
+    };*/
 }
 
 #endif /* CDB_DEFINITIONS__H */

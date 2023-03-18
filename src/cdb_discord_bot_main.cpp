@@ -23,18 +23,18 @@ void cdb::DiscordBot::init(std::string token, std::string bot_id)
     switch (event.severity) {
         case dpp::ll_trace:
         case dpp::ll_debug:
-            this->logger->debug("Discord Bot: " + event.message);
+            LOG_DEBUG(logger, "Discord Bot: " + event.message);
             break;
         case dpp::ll_info:
-            this->logger->info("Discord Bot: " +  event.message);
+            LOG_INFO(logger, "Discord Bot: " +  event.message);
             break;
         case dpp::ll_warning:
-            this->logger->warn("Discord Bot: " + event.message);
+            LOG_WARN(logger, "Discord Bot: " + event.message);
             break;
         case dpp::ll_error:
         case dpp::ll_critical:
         default:
-            this->logger->error("Discord Bot: " + event.message);
+            LOG_ERROR(logger, "Discord Bot: " + event.message);
             break;
         }
     });
@@ -49,38 +49,43 @@ void cdb::DiscordBot::init(std::string token, std::string bot_id)
         char dev_id[50];
         char * tmp;
         int index = 0;
-        cdb::callback_msg msg = {CDB_MSG_MAX, "N/A"};
+        cdb::intra_msg_t msg;
+        cdb::discord_bot_msg_t bot;
+        msg.sender = CDB_DISCORD_BOT;
+        msg.content.bot = &bot;
 
-        this->logger->debug("parse message  " + event.custom_id);
+        LOG_DEBUG(logger, "parse message " + event.custom_id);
 
         strncpy(dev_id, event.custom_id.c_str(), sizeof(dev_id));
         tmp = strtok(dev_id, "#");
 
         while (tmp != NULL)
         {
+            std::string tmp_s = tmp;
+
             switch(index++){
                 case 0:
-                    msg.content = tmp;
-                    this->logger->debug("message is " + msg.content);
+                    bot.device = tmp_s;
+                    LOG_DEBUG(logger, "message is " + bot.device);
                     break;
                 case 1:
-                    if (strcmp(tmp, "ON") == 0) {
-                        msg.type = CDB_MSG_MQTT_HANDLER_TURN_DEVICE_ON;
-                    } else if (strcmp(tmp, "OFF") == 0) {
-                        msg.type = CDB_MSG_MQTT_HANDLER_TURN_DEVICE_OFF;
-                    }
+                    if (tmp_s == "ON" || tmp_s == "OFF") {
+                        bot.type = CDB_INTRA_DISC_BOT_COMMAND;
 
-                    this->logger->debug("type is " + std::to_string(msg.type));
+                        LOG_DEBUG(logger, "type is " + std::to_string(bot.type));
+                    } else {
+                        LOG_DEBUG(logger, "invalid message content " + tmp_s);
+                    }
                     break;
                 default:
-                    this->logger->error("Unexpected number of arguments : " + event.custom_id);
+                    LOG_ERROR(logger, "Unexpected number of arguments : " + event.custom_id);
                     break;
             }
 
             tmp = strtok (NULL, "#");
         }
 
-        this->m_handler->message_cb(&msg);
+        this->message_handler->message_cb(&msg);
     });
 
     on_ready([this](const dpp::ready_t& event) {
@@ -101,9 +106,9 @@ void cdb::DiscordBot::init(std::string token, std::string bot_id)
     start(dpp::st_return);
 }
 
-void cdb::DiscordBot::set_mqtt_handler(cdb::CallbackClass * m_handler)
+void cdb::DiscordBot::set_message_handler(cdb::CallbackClass * handler)
 {
-    this->m_handler = m_handler;
+    this->message_handler = handler;
 }
 
 void cdb::DiscordBot::set_logger(cdb::Logger * l)

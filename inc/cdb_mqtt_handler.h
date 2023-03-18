@@ -7,7 +7,6 @@
 #include "cdb_configurator.h"
 #include "cdb_mqtt_device.h"
 #include "cdb_mqtt_server.h"
-#include "cdb_discord_bot.h"
 #include "cdb_logger.h"
 
 namespace cdb {
@@ -24,7 +23,7 @@ namespace cdb {
         private:
             static cdb::Logger * logger;
             mosquitto * mosq;
-            cdb::CallbackClass * bot;
+            cdb::CallbackClass * message_handler;
             cdb::Configurator * conf;
 
             void (cdb::MqttHandler::*loggerptr)(mosquitto *, void *, int, const char *);
@@ -54,14 +53,12 @@ namespace cdb {
             void set_logger(cdb::Logger * logger);
 
             /**
-             * @brief Set a pointer to the discord bot module
+             * @brief Set a pointer to the module that will handle
+             *        messages coming from this object
              *
-             *        The bot is able to receive messages from the
-             *        handler for any updates from the managed devices
-             *
-             * @param bot The discord bot object
+             * @param message_handler The message handling object
              */
-            void set_discord_bot(cdb::CallbackClass * bot);
+            void set_message_handler(cdb::CallbackClass * handler);
 
             /**
              * @brief Initialize the handler
@@ -93,7 +90,7 @@ namespace cdb {
              *
              * @param msg The message information
              */
-            void message_cb(cdb::callback_msg * msg);
+            void message_cb(cdb::intra_msg_t * msg);
 
             /**
              * @brief To be called by the mosquitto callback
