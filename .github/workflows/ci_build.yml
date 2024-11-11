@@ -15,3 +15,6 @@ jobs:
 
     - name: build
       run: make all
+
+    - name: copy artifacts
+      run: cp bin/* /artifacts/
